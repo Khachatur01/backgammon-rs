@@ -149,15 +149,16 @@ impl Board {
             Player::Black => &mut self.black_checkers
         };
 
-        let can_bear_off: bool = active_player_checkers.on_board[0..(PIPS_SIZE - 6)]
+        let not_all_checkers_are_in_home: bool = active_player_checkers.on_board[0..(PIPS_SIZE - 6)]
             .iter()
             .filter(|checkers| **checkers == 0)
-            .count() == 0;
+            .count() != 0;
 
-        if !can_bear_off {
+        if not_all_checkers_are_in_home {
             return Err(BearOffError::NotAllCheckersAreInHome);
         }
 
+        /* If we reached to this point, then 'from' is a valid value in range [18, 24) */
         let from: usize = self.taken_checker.expect(
             "Can't move checker to position {to}.\
                 No checker grabbed yet.\
