@@ -166,7 +166,7 @@ impl Board {
         );
 
         active_player_checkers.on_board[from] -= 1;
-        active_player_checkers.bore_off_count -= 1;
+        active_player_checkers.bore_off_count += 1;
 
         Ok(())
     }
