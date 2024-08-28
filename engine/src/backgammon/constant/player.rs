@@ -1,6 +1,6 @@
 
 #[derive(Copy, Clone, Debug)]
-pub enum Player {
+pub enum Side {
     White,
     Black
 }

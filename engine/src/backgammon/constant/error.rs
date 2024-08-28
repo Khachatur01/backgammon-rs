@@ -11,3 +11,16 @@ pub enum MoveError {
 pub enum BearOffError {
     NotAllCheckersAreInHome
 }
+
+pub enum CommitError {
+    NotAllDicesPlayed
+}
+
+pub enum ThrowDicesError {
+    DicesAlreadyThrown,
+    GameDoesntNotStartedYet
+}
+
+pub enum SwitchSideError {
+    ActiveSideDoesntFinishPlaying
+}
