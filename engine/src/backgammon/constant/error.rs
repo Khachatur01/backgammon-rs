@@ -5,11 +5,12 @@ pub enum TakeError {
 
 pub enum MoveError {
     BlockingOpponent,
-    PlaceIsTakenByOpponent
+    NoCheckerTaken
 }
 
 pub enum BearOffError {
-    NotAllCheckersAreInHome
+    NotAllCheckersAreInHome,
+    NoCheckerTaken
 }
 
 pub enum CommitError {

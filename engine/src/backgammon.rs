@@ -8,6 +8,7 @@ use crate::types::to_pip::ToPip;
 use rand::Rng;
 use crate::constant::error::SwitchSideError::ActiveSideDoesntFinishPlaying;
 use crate::constant::error::ThrowDicesError::{DicesAlreadyThrown, GameDoesntNotStartedYet};
+use crate::types::action::Action;
 
 pub mod constant;
 pub mod board;
@@ -25,6 +26,8 @@ pub struct Backgammon {
 
     board: Board,
 
+    last_action: Option<Action>,
+
     taken_checker: Option<FromPip>,
     dices: Option<DicePair>,
     done_moves: Vec<Move>
@@ -38,33 +41,39 @@ impl Backgammon {
 
             board: Board::new(),
 
+            last_action: None,
+
             taken_checker: None,
             dices: None,
             done_moves: vec![]
         }
     }
 
-    pub fn throw_first_dice(&mut self) {
-        if self.active_side.is_some() {
+    pub fn throw_first_dices(&mut self) {
+        if self.last_action.is_some() {
             panic!("Can't throw first dices. Game already started");
         }
 
         /* generate random dices until dices are equal */
-        let (first_dice, second_dice) = loop {
+        let dice_pair: DicePair = loop {
             let first_dice: u8 = rand::thread_rng().gen_range(1..=6);
             let second_dice: u8 = rand::thread_rng().gen_range(1..=6);
 
             if first_dice != second_dice {
-                break (first_dice, second_dice);
+                break DicePair::new(first_dice, second_dice);
             }
         };
 
         self.active_side =
-            if first_dice > second_dice {
+            if dice_pair.0 > dice_pair.1 {
                 Some(Side::White)
             } else {
                 Some(Side::Black)
-            }
+            };
+
+        let action: Action = Action::ThrowFirstDices(dice_pair);
+
+        self.last_action = Some(action);
     }
 
     pub fn take_checker(&mut self, from: FromPip) -> Result<TakeError> {
@@ -72,19 +81,35 @@ impl Backgammon {
     }
 
     pub fn move_checker(&mut self, to: ToPip) -> Result<MoveError> {
+        match self.last_action.as_ref() {
+            Some(Action::TakeChecker(_)) => {}
+            _ => {
+                return Err(MoveError::NoCheckerTaken)
+            }
+        }
+
         Ok(())
     }
 
     pub fn bear_off_checker(&mut self) -> Result<BearOffError> {
+        match self.last_action.as_ref() {
+            Some(Action::TakeChecker(_)) => {}
+            _ => {
+                return Err(BearOffError::NoCheckerTaken)
+            }
+        }
+
         Ok(())
     }
 
     pub fn commit_moves(&mut self) -> Result<CommitError> {
+        self.last_action = Some(Action::CommitMoves);
+
         Ok(())
     }
 
     pub fn cancel_moves(&mut self) {
-
+        self.last_action = Some(Action::CommitMoves);
     }
 
     pub fn switch_side(&mut self) -> Result<SwitchSideError> {
