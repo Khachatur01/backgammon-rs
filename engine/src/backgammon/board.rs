@@ -4,6 +4,8 @@ use crate::backgammon::constant::player::Side;
 use crate::backgammon::types::from_pip::FromPip;
 use crate::backgammon::types::r#move::Move;
 use crate::backgammon::types::r#move::Move::{BearOff, Step};
+use crate::constant::result::CheckerAvailability;
+use crate::types::pip::Pip;
 
 mod checkers;
 
@@ -120,5 +122,22 @@ impl Board {
                 active_side_checkers.bore_off_count += 1;
             }
         }
+    }
+
+    pub fn get_checker_availability(&self, for_side: Side, pip: Pip) -> CheckerAvailability {
+        let (active_side_checkers, opponent_side_checkers) = match for_side {
+            Side::White => (&self.white_checkers, &self.black_checkers),
+            Side::Black => (&self.black_checkers, &self.white_checkers)
+        };
+
+        if opponent_side_checkers.on_board[*pip as usize] != 0 {
+            return CheckerAvailability::ReferringToOpponentPip;
+        };
+
+        if active_side_checkers.on_board[*pip as usize] == 0 {
+            return CheckerAvailability::NoCheckerFound;
+        };
+
+        CheckerAvailability::Available
     }
 }

@@ -1,6 +1,9 @@
 use std::ops::Deref;
 
-pub struct DicePair(u8, u8);
+pub struct DicePair {
+    first: u8,
+    second: u8,
+}
 
 impl DicePair {
     pub fn new(first: u8, second: u8) -> Self {
@@ -12,14 +15,16 @@ impl DicePair {
             );
         }
 
-        Self(first, second)
+        Self {
+            first, second
+        }
     }
-}
 
-impl Deref for DicePair {
-    type Target = (u8, u8);
+    pub fn first(&self) -> u8 {
+        self.first
+    }
 
-    fn deref(&self) -> &Self::Target {
-        &self
+    pub fn second(&self) -> u8 {
+        self.second
     }
 }

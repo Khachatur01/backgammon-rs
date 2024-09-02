@@ -1,6 +1,7 @@
 use std::ops::Deref;
 use crate::backgammon::constant::PIPS_SIZE;
 
+#[derive(Copy, Clone, Debug)]
 pub struct FromPip(u8);
 
 impl FromPip {
