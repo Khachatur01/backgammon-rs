@@ -1,4 +1,3 @@
-use crate::board::Board;
 use crate::board::checkers::Checkers;
 use crate::constant::player::Side;
 use crate::types::dice_pair::DicePair;
@@ -12,6 +11,8 @@ pub mod checker_moved;
 pub mod win;
 pub mod side_switched;
 pub mod moves_commited;
+pub mod no_possible_moves;
+pub mod after_throwing_dices;
 
 pub trait Stage {
     fn white_checkers(&self) -> &Checkers;

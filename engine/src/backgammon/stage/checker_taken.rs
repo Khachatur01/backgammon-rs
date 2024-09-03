@@ -1,16 +1,15 @@
 use crate::backgammon::stage::dices_thrown::DicesThrown;
 use crate::backgammon::stage::out_of_moves::OutOfMoves;
-use crate::board::Board;
 use crate::board::checkers::Checkers;
+use crate::board::Board;
 use crate::constant::error::{BearOffError, MoveError};
 use crate::constant::player::Side;
 use crate::constant::result::CheckerAvailability;
 use crate::stage::checker_moved::CheckerMoved;
 use crate::stage::Stage;
+use crate::types::checker_move::CheckerMove;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
-use crate::types::checker_move::CheckerMove;
-use crate::types::checker_move::CheckerMove::{BearOff, Play};
 
 pub struct CheckerTaken {
     board: Board,
@@ -24,7 +23,7 @@ impl Stage for CheckerTaken {
     fn white_checkers(&self) -> &Checkers { &self.board.white_checkers }
     fn black_checkers(&self) -> &Checkers { &self.board.black_checkers }
     fn active_side(&self) -> Option<Side> { Some(self.active_side) }
-    fn dice_pair(&self) -> Option<DicePair> { Some(Self.dice_pair) }
+    fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { Some(self.from_pip) }
 }
 
@@ -46,7 +45,7 @@ impl CheckerTaken {
 
     pub fn play_checker(mut self, to_pip: Pip) -> Result<CheckerMoved, MoveError> {
         let from_pip: Pip = self.from_pip;
-        let play: CheckerMove = Play(from_pip, to_pip);
+        let play: CheckerMove = CheckerMove::Play(from_pip, to_pip);
 
         self.check_target_pip_availability(to_pip)?;
         self.check_if_blocking_opponent(play)?;
@@ -62,7 +61,7 @@ impl CheckerTaken {
     pub fn bear_off_checker(mut self) -> Result<CheckerMoved, BearOffError> {
         let active_side: Side = self.active_side;
         let from_pip: Pip = self.from_pip;
-        let bear_off: CheckerMove = BearOff(from_pip);
+        let bear_off: CheckerMove = CheckerMove::BearOff(from_pip);
 
         if !self.board.are_all_checkers_in_home(active_side) {
             return Err(BearOffError::NotAllCheckersAreInHome);
@@ -72,7 +71,7 @@ impl CheckerTaken {
             return Err(BearOffError::InconsistentWithDices)
         };
 
-        let next_stage: CheckerMoved = self.move_checker(BearOff(from_pip));
+        let next_stage: CheckerMoved = self.move_checker(CheckerMove::BearOff(from_pip));
 
         Ok(next_stage)
     }
@@ -90,8 +89,8 @@ impl CheckerTaken {
 
     fn check_move_possibility(&self, checker_move: CheckerMove) -> Result<(), ()> {
         let from_pip = match checker_move {
-            Play(from_pip, _) => from_pip,
-            BearOff(from_pip) => from_pip,
+            CheckerMove::Play(from_pip, _) => from_pip,
+            CheckerMove::BearOff(from_pip) => from_pip,
         };
 
         let mut possible_moves: Vec<CheckerMove> = self.board.get_possible_moves_from(
@@ -116,9 +115,9 @@ impl CheckerTaken {
 
     fn check_if_blocking_opponent(&self, checker_move: CheckerMove) -> Result<(), MoveError> {
         let is_blocking: bool = match checker_move {
-            Play(from_pip, to_pip) =>
+            CheckerMove::Play(from_pip, to_pip) =>
                 self.board.is_blocking_opponent(self.active_side, from_pip, to_pip),
-            BearOff(_) => false,
+            CheckerMove::BearOff(_) => false,
         };
 
         if is_blocking {

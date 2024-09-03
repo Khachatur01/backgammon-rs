@@ -1,4 +1,5 @@
 use crate::backgammon::stage::dices_thrown::DicesThrown;
+use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::player::Side;
 use crate::stage::Stage;
@@ -6,7 +7,6 @@ use crate::types::checker_move::CheckerMove;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
 use rand::Rng;
-use crate::board::checkers::Checkers;
 
 pub struct Start {
     board: Board,

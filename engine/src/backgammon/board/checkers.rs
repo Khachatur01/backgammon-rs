@@ -7,14 +7,16 @@ pub struct Checkers {
 
 impl Default for Checkers {
     fn default() -> Self {
-        let mut white_checkers: [u8; PIPS_SIZE as usize] = [0; PIPS_SIZE as usize];
+        let mut checkers: [u8; PIPS_SIZE as usize] = [0; PIPS_SIZE as usize];
 
-        if let Some(last_pip) = white_checkers.last_mut() {
-            *last_pip = CHECKER_PER_PLAYER;
-        }
+        let last_pip: &mut u8 = checkers
+            .last_mut()
+            .expect("Can't create checkers. Pips didn't initialize."); /* impossible case */
+
+        *last_pip = CHECKER_PER_PLAYER;
 
         Self {
-            on_board: white_checkers,
+            on_board: checkers,
             bore_off_count: 0,
         }
     }

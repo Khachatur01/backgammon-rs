@@ -1,6 +1,5 @@
-use engine::stage::checker_moved::CheckerMoved;
-use engine::types::pip::Pip;
 use engine::start_game;
+use engine::types::pip::Pip;
 
 fn main() {
     let mut stage = start_game();
