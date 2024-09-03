@@ -1,7 +1,7 @@
 use crate::backgammon::constant::PIPS_SIZE;
 use std::ops::Deref;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Pip(u8);
 
 impl Pip {

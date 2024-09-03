@@ -7,12 +7,14 @@ pub enum TakeError {
 #[derive(Debug)]
 pub enum MoveError {
     BlockingOpponent,
-    PipIsOccupiedByOpponent
+    PipIsOccupiedByOpponent,
+    InconsistentWithDices
 }
 
 #[derive(Debug)]
 pub enum BearOffError {
     NotAllCheckersAreInHome,
+    InconsistentWithDices
 }
 
 #[derive(Debug)]

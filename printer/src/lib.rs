@@ -1,3 +1,6 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use engine::stage::Stage;
+
+fn print(stage: Box<dyn Stage>) {
+    stage.white_checkers();
+    stage.black_checkers();
 }

@@ -1,19 +1,30 @@
 use crate::backgammon::stage::dices_thrown::DicesThrown;
 use crate::board::Board;
 use crate::constant::player::Side;
-use crate::types::dice_pair::DicePair;
+use crate::stage::Stage;
 use crate::types::checker_move::CheckerMove;
+use crate::types::dice_pair::DicePair;
+use crate::types::pip::Pip;
 use rand::Rng;
+use crate::board::checkers::Checkers;
 
 pub struct Start {
     board: Board,
-    moves_done: Vec<CheckerMove>,
+    done_moves: Vec<CheckerMove>,
+}
+
+impl Stage for Start {
+    fn white_checkers(&self) -> &Checkers { &self.board.white_checkers }
+    fn black_checkers(&self) -> &Checkers { &self.board.black_checkers }
+    fn active_side(&self) -> Option<Side> { None }
+    fn dice_pair(&self) -> Option<DicePair> { None }
+    fn taken_checker_pip(&self) -> Option<Pip> { None }
 }
 
 impl Start {
-    pub fn new(board: Board, moves_done: Vec<CheckerMove>) -> Self {
+    pub fn new(board: Board, done_moves: Vec<CheckerMove>) -> Self {
         Self {
-            board, moves_done
+            board, done_moves
         }
     }
 
@@ -35,6 +46,6 @@ impl Start {
                 Side::Black
             };
 
-        DicesThrown::new(self.board, self.moves_done, active_side, dice_pair)
+        DicesThrown::new(self.board, self.done_moves, active_side, dice_pair)
     }
 }
