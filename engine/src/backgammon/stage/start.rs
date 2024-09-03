@@ -1,17 +1,17 @@
 use crate::backgammon::stage::dices_thrown::DicesThrown;
 use crate::board::Board;
 use crate::constant::player::Side;
-use crate::types::dices::DicePair;
-use crate::types::r#move::Move;
+use crate::types::dice_pair::DicePair;
+use crate::types::checker_move::CheckerMove;
 use rand::Rng;
 
 pub struct Start {
     board: Board,
-    moves_done: Vec<Move>,
+    moves_done: Vec<CheckerMove>,
 }
 
 impl Start {
-    pub fn new(board: Board, moves_done: Vec<Move>) -> Self {
+    pub fn new(board: Board, moves_done: Vec<CheckerMove>) -> Self {
         Self {
             board, moves_done
         }

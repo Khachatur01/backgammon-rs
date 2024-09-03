@@ -1,8 +1,8 @@
 use crate::backgammon::board::checkers::Checkers;
 use crate::backgammon::constant::player::Side;
 use crate::backgammon::constant::PIPS_SIZE;
-use crate::backgammon::types::r#move::Move;
-use crate::backgammon::types::r#move::Move::{BearOff, Step};
+use crate::backgammon::types::checker_move::CheckerMove;
+use crate::backgammon::types::checker_move::CheckerMove::{BearOff, Step};
 use crate::constant::result::CheckerAvailability;
 use crate::types::pip::Pip;
 
@@ -35,19 +35,13 @@ Expanded:
     Player 2:
         11  10  9   8   7   6      5   4   3   2   1   0  >--+ +--< 23  22  21  20  19  18      17  16  15  14  13  12
 */
+#[derive(Default)]
 pub struct Board {
     white_checkers: Checkers,
     black_checkers: Checkers,
 }
 
 impl Board {
-    pub fn new() -> Self {
-        Self {
-            white_checkers: Default::default(),
-            black_checkers: Default::default(),
-        }
-    }
-
     pub fn calculate_pip_count_score(&self, for_side: Side) -> u16 {
         let active_side_checkers: &Checkers = match for_side {
             Side::White => &self.white_checkers,
@@ -64,8 +58,8 @@ impl Board {
             })
     }
 
-    pub fn get_possible_moves(&self, for_side: Side, available_steps: &[u8]) -> Vec<Move> {
-        let mut moves: Vec<Move> = Vec::new();
+    pub fn get_possible_moves(&self, for_side: Side, available_steps: &[u8]) -> Vec<CheckerMove> {
+        let mut moves: Vec<CheckerMove> = Vec::new();
 
         let active_side_checkers: &Checkers = match for_side {
             Side::White => &self.white_checkers,
@@ -79,7 +73,7 @@ impl Board {
                 continue;
             }
 
-            let mut moves_from_index: Vec<Move> = self.get_possible_moves_from(
+            let mut moves_from_index: Vec<CheckerMove> = self.get_possible_moves_from(
                 for_side,
                 available_steps,
                 Pip::new(index)
@@ -94,7 +88,7 @@ impl Board {
     pub fn get_possible_moves_from(&self,
                                    for_side: Side,
                                    available_steps: &[u8],
-                                   from: Pip) -> Vec<Move> {
+                                   from: Pip) -> Vec<CheckerMove> {
 
         /* playing from the head */
         if *from == PIPS_SIZE - 1 {
@@ -105,7 +99,7 @@ impl Board {
         vec![]
     }
 
-    pub fn move_checker(&mut self, for_side: Side, checker_move: Move) {
+    pub fn move_checker(&mut self, for_side: Side, checker_move: CheckerMove) {
         let active_side_checkers: &mut Checkers = match for_side {
             Side::White => &mut self.white_checkers,
             Side::Black => &mut self.black_checkers

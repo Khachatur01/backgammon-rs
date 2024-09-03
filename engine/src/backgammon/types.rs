@@ -1,3 +1,3 @@
 pub mod pip;
-pub mod r#move;
-pub mod dices;
+pub mod checker_move;
+pub mod dice_pair;

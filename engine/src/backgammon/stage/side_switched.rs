@@ -1,19 +1,19 @@
 use crate::board::Board;
 use crate::constant::player::Side;
 use crate::stage::dices_thrown::DicesThrown;
-use crate::types::dices::DicePair;
-use crate::types::r#move::Move;
+use crate::types::dice_pair::DicePair;
+use crate::types::checker_move::CheckerMove;
 
 pub struct SideSwitched {
     board: Board,
-    moves_done: Vec<Move>,
+    moves_done: Vec<CheckerMove>,
     active_side: Side,
     dice_pair: DicePair,
 }
 
 impl SideSwitched {
     pub fn new(board: Board,
-               moves_done: Vec<Move>,
+               moves_done: Vec<CheckerMove>,
                active_side: Side,
                dice_pair: DicePair) -> Self {
         Self {

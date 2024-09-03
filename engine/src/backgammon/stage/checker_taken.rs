@@ -5,14 +5,14 @@ use crate::constant::error::MoveError;
 use crate::constant::player::Side;
 use crate::constant::result::CheckerAvailability;
 use crate::stage::checker_moved::CheckerMoved;
-use crate::types::dices::DicePair;
+use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
-use crate::types::r#move::Move;
-use crate::types::r#move::Move::Step;
+use crate::types::checker_move::CheckerMove;
+use crate::types::checker_move::CheckerMove::Step;
 
 pub struct CheckerTaken {
     board: Board,
-    moves_done: Vec<Move>,
+    moves_done: Vec<CheckerMove>,
     from_pip: Pip,
     active_side: Side,
     dice_pair: DicePair,
@@ -20,7 +20,7 @@ pub struct CheckerTaken {
 
 impl CheckerTaken {
     pub fn new(board: Board,
-               moves_done: Vec<Move>,
+               moves_done: Vec<CheckerMove>,
                from_pip: Pip,
                active_side: Side,
                dice_pair: DicePair) -> Self {
@@ -39,7 +39,11 @@ impl CheckerTaken {
         };
 
         /* TODO: check move validity */
-        self.board.move_checker(self.active_side, Step(form_pip, to_pip));
+
+        let checker_move: CheckerMove = Step(form_pip, to_pip);
+
+        self.board.move_checker(self.active_side, checker_move);
+        self.moves_done.push(checker_move);
 
         let next_stage: CheckerMoved = match true {
             true => {

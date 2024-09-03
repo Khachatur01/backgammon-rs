@@ -3,21 +3,28 @@ use crate::board::Board;
 use crate::constant::error::TakeError;
 use crate::constant::player::Side;
 use crate::constant::result::CheckerAvailability;
-use crate::types::dices::DicePair;
+use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
-use crate::types::r#move::Move;
+use crate::types::checker_move::CheckerMove;
 
 pub struct DicesThrown {
     board: Board,
-    moves_done: Vec<Move>,
+    moves_done: Vec<CheckerMove>,
     active_side: Side,
     dice_pair: DicePair,
 }
 
 impl DicesThrown {
-    pub fn new(board: Board, moves_done: Vec<Move>, active_side: Side, dice_pair: DicePair) -> Self {
+    pub fn new(board: Board,
+               moves_done: Vec<CheckerMove>,
+               active_side: Side,
+               dice_pair: DicePair) -> Self {
+
         Self {
-            board, active_side, dice_pair, moves_done
+            board,
+            active_side,
+            dice_pair,
+            moves_done
         }
     }
 

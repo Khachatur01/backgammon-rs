@@ -1,6 +1,7 @@
 use crate::types::pip::Pip;
 
-pub enum Move {
+#[derive(Clone, Copy)]
+pub enum CheckerMove {
     Step(Pip, Pip),
     BearOff(Pip)
 }

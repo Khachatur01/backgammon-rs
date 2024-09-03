@@ -11,5 +11,5 @@ pub mod stage;
 pub type Result<E> = std::result::Result<(), E>;
 
 pub fn start_game() -> Start {
-    Start::new(Board::new(), vec![])
+    Start::new(Board::default(), vec![])
 }
