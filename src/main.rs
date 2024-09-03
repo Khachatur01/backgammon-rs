@@ -1,15 +1,14 @@
-use engine::types::from_pip::FromPip;
-use engine::types::to_pip::ToPip;
-use engine::Backgammon;
+use engine::types::pip::Pip;
+use engine::start_game;
 
 fn main() {
-    let mut stage = Backgammon::new();
+    let mut stage = start_game();
 
     let mut stage = stage.throw_dices();
 
-    let mut stage = stage.take_checker(FromPip::new(1));
+    let mut stage = stage.take_checker(Pip::new(23));
 
-    let mut stage = stage.unwrap().move_checker(ToPip::new(2));
+    let mut stage = stage.unwrap().move_checker(Pip::new(2));
 
     println!("Hello world");
 }

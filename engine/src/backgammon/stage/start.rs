@@ -1,23 +1,23 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-use rand::Rng;
-use crate::Backgammon;
 use crate::backgammon::stage::dices_thrown::DicesThrown;
+use crate::board::Board;
 use crate::constant::player::Side;
 use crate::types::dices::DicePair;
+use crate::types::r#move::Move;
+use rand::Rng;
 
 pub struct Start {
-    backgammon: Rc<RefCell<Backgammon>>
+    board: Board,
+    moves_done: Vec<Move>,
 }
 
 impl Start {
-    pub fn new(backgammon: Rc<RefCell<Backgammon>>) -> Self {
-        Self { backgammon }
+    pub fn new(board: Board, moves_done: Vec<Move>) -> Self {
+        Self {
+            board, moves_done
+        }
     }
 
-    pub fn throw_dices(&mut self) -> DicesThrown {
-        let mut backgammon = self.backgammon.borrow_mut();
-
+    pub fn throw_dices(self) -> DicesThrown {
         /* generate random dices until dices are equal */
         let dice_pair: DicePair = loop {
             let first_dice: u8 = rand::thread_rng().gen_range(1..=6);
@@ -28,15 +28,13 @@ impl Start {
             }
         };
 
-        backgammon.active_side =
+        let active_side: Side =
             if dice_pair.first() > dice_pair.second() {
-                Some(Side::White)
+                Side::White
             } else {
-                Some(Side::Black)
+                Side::Black
             };
 
-        backgammon.dice_pair = Some(dice_pair);
-
-        DicesThrown::new(self.backgammon.clone())
+        DicesThrown::new(self.board, self.moves_done, active_side, dice_pair)
     }
 }

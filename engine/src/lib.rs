@@ -1,3 +1,3 @@
 mod backgammon;
 
-pub use backgammon::{*};
+pub use backgammon::*;

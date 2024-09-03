@@ -1,7 +1,6 @@
 use crate::backgammon::board::checkers::Checkers;
-use crate::backgammon::constant::PIPS_SIZE;
 use crate::backgammon::constant::player::Side;
-use crate::backgammon::types::from_pip::FromPip;
+use crate::backgammon::constant::PIPS_SIZE;
 use crate::backgammon::types::r#move::Move;
 use crate::backgammon::types::r#move::Move::{BearOff, Step};
 use crate::constant::result::CheckerAvailability;
@@ -83,7 +82,7 @@ impl Board {
             let mut moves_from_index: Vec<Move> = self.get_possible_moves_from(
                 for_side,
                 available_steps,
-                FromPip::new(index)
+                Pip::new(index)
             );
 
             moves.append(&mut moves_from_index);
@@ -95,7 +94,7 @@ impl Board {
     pub fn get_possible_moves_from(&self,
                                    for_side: Side,
                                    available_steps: &[u8],
-                                   from: FromPip) -> Vec<Move> {
+                                   from: Pip) -> Vec<Move> {
 
         /* playing from the head */
         if *from == PIPS_SIZE - 1 {
@@ -130,7 +129,9 @@ impl Board {
             Side::Black => (&self.black_checkers, &self.white_checkers)
         };
 
-        if opponent_side_checkers.on_board[*pip as usize] != 0 {
+        let opponent_pip: Pip = self.to_opponent_pip(pip);
+
+        if opponent_side_checkers.on_board[*opponent_pip as usize] != 0 {
             return CheckerAvailability::ReferringToOpponentPip;
         };
 
@@ -139,5 +140,15 @@ impl Board {
         };
 
         CheckerAvailability::Available
+    }
+
+    fn to_opponent_pip(&self, pip: Pip) -> Pip {
+        let half_count: u8 = PIPS_SIZE / 2;
+
+        if *pip >= half_count {
+            Pip::new(*pip - half_count)
+        } else {
+            Pip::new(*pip + half_count)
+        }
     }
 }

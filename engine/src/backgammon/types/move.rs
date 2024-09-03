@@ -1,7 +1,6 @@
-use crate::backgammon::types::from_pip::FromPip;
-use crate::backgammon::types::to_pip::ToPip;
+use crate::types::pip::Pip;
 
 pub enum Move {
-    Step(FromPip, ToPip),
-    BearOff(FromPip)
+    Step(Pip, Pip),
+    BearOff(Pip)
 }

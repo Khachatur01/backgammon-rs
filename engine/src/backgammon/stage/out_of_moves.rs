@@ -1,45 +1,53 @@
-use std::cell::RefCell;
-use std::rc::Rc;
 use crate::backgammon::stage::dices_thrown::DicesThrown;
-use crate::backgammon::stage::moves_commited::MovesCommited;
-use crate::Backgammon;
+use crate::board::Board;
 use crate::constant::error::CommitError;
 use crate::constant::player::Side;
+use crate::stage::moves_commited::MovesCommited;
+use crate::stage::side_switched::SideSwitched;
+use crate::stage::win::Win;
+use crate::types::dices::DicePair;
+use crate::types::r#move::Move;
 
 pub struct OutOfMoves {
-    backgammon: Rc<RefCell<Backgammon>>
+    board: Board,
+    moves_done: Vec<Move>,
+    active_side: Side,
+    dice_pair: DicePair,
 }
 
 impl OutOfMoves {
-    pub fn new(backgammon: Rc<RefCell<Backgammon>>) -> Self {
-        Self { backgammon }
+    pub fn new(board: Board, moves_done: Vec<Move>, active_side: Side, dice_pair: DicePair) -> Self {
+        Self {
+            board, moves_done, active_side, dice_pair
+        }
     }
 
+    pub fn commit_moves(self) -> Result<MovesCommited, CommitError> {
+        let next_stage: MovesCommited = match true {
+            true => {
+                MovesCommited::Win(
+                    Win {}
+                )
+            }
+            false => {
+                /* Switch active side */
+                let new_active_side: Side = match self.active_side {
+                    Side::White => Side::Black,
+                    Side::Black => Side::White,
+                };
 
-    pub fn commit_moves(&mut self) -> Result<MovesCommited, CommitError> {
-        let mut backgammon = self.backgammon.borrow_mut();
-        let active_side: Side = backgammon.active_side.expect("Can't commit moves. No active Side");
-
-        /* Switch active side */
-        backgammon.active_side = match active_side {
-            Side::White => Some(Side::Black),
-            Side::Black => Some(Side::White),
+                MovesCommited::SideSwitched(
+                    SideSwitched::new(self.board, self.moves_done, new_active_side, self.dice_pair)
+                )
+            }
         };
 
-        backgammon.dice_pair = None;
-
-        Ok(
-            MovesCommited::new(self.backgammon.clone())
-        )
+        Ok(next_stage)
     }
 
-    pub fn cancel_moves(&mut self) -> DicesThrown {
-        let backgammon = self.backgammon.borrow_mut();
-
+    pub fn cancel_moves(self) -> DicesThrown {
         /* TODO: undo all done moves */
 
-        backgammon.moves_done = vec![];
-
-        DicesThrown::new(self.backgammon.clone())
+        DicesThrown::new(self.board, self.moves_done, self.active_side, self.dice_pair)
     }
 }

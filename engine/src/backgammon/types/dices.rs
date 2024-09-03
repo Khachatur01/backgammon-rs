@@ -1,5 +1,4 @@
-use std::ops::Deref;
-
+#[derive(Copy, Clone)]
 pub struct DicePair {
     first: u8,
     second: u8,

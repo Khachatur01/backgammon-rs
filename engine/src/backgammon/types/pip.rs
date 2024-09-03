@@ -1,19 +1,20 @@
-use std::ops::Deref;
 use crate::backgammon::constant::PIPS_SIZE;
-use crate::types::from_pip::FromPip;
-use crate::types::to_pip::ToPip;
+use std::ops::Deref;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Pip(u8);
 
-impl From<FromPip> for Pip {
-    fn from(value: FromPip) -> Self {
-        Pip(*value)
-    }
-}
-impl From<ToPip> for Pip {
-    fn from(value: ToPip) -> Self {
-        Pip(*value)
+impl Pip {
+    pub fn new(value: u8) -> Self {
+        if value >= PIPS_SIZE {
+            panic!(
+                "Can't create Pip. \
+                Invalid value: {value}. \
+                Must be in the range [0 - {PIPS_SIZE})"
+            );
+        }
+
+        Self(value)
     }
 }
 
