@@ -27,9 +27,16 @@ impl Stage for OutOfMoves {
 }
 
 impl OutOfMoves {
-    pub fn new(board: Board, done_moves: Vec<CheckerMove>, active_side: Side, dice_pair: DicePair) -> Self {
+    pub fn new(board: Board,
+               done_moves: Vec<CheckerMove>,
+               active_side: Side,
+               dice_pair: DicePair) -> Self {
+
         Self {
-            board, done_moves, active_side, dice_pair
+            board,
+            done_moves,
+            active_side,
+            dice_pair
         }
     }
 
