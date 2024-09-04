@@ -1,4 +1,4 @@
-use crate::backgammon::constant::PIPS_SIZE;
+use crate::constant::PIPS_SIZE;
 use std::ops::Deref;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

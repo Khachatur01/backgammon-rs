@@ -1,5 +1,5 @@
-use crate::backgammon::stage::dices_thrown::DicesThrown;
-use crate::backgammon::stage::out_of_moves::OutOfMoves;
+use crate::stage::dices_thrown::DicesThrown;
+use crate::stage::out_of_moves::OutOfMoves;
 use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::error::{BearOffError, MoveError};

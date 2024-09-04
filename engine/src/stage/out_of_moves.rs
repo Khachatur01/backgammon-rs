@@ -1,4 +1,4 @@
-use crate::backgammon::stage::dices_thrown::DicesThrown;
+use crate::stage::dices_thrown::DicesThrown;
 use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::error::CommitError;

@@ -1,4 +1,4 @@
-use crate::backgammon::constant::{CHECKER_PER_PLAYER, PIPS_SIZE};
+use crate::constant::{CHECKER_PER_PLAYER, PIPS_SIZE};
 
 pub struct Checkers {
     pub on_board: [u8; PIPS_SIZE as usize],

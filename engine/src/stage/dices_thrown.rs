@@ -1,4 +1,4 @@
-use crate::backgammon::stage::checker_taken::CheckerTaken;
+use crate::stage::checker_taken::CheckerTaken;
 use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::error::TakeError;

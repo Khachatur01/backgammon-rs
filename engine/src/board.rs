@@ -1,8 +1,8 @@
-use crate::backgammon::board::checkers::Checkers;
-use crate::backgammon::constant::player::Side;
-use crate::backgammon::constant::PIPS_SIZE;
-use crate::backgammon::types::checker_move::CheckerMove;
-use crate::backgammon::types::checker_move::CheckerMove::{BearOff, Play};
+use crate::board::checkers::Checkers;
+use crate::constant::player::Side;
+use crate::constant::PIPS_SIZE;
+use crate::types::checker_move::CheckerMove;
+use crate::types::checker_move::CheckerMove::{BearOff, Play};
 use crate::constant::result::CheckerAvailability;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;

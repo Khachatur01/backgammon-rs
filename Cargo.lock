@@ -12,7 +12,6 @@ checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
 name = "backgammon-rs"
 version = "0.1.0"
 dependencies = [
- "crossterm",
  "engine",
 ]
 
@@ -21,6 +20,13 @@ name = "bitflags"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
+
+[[package]]
+name = "board-stage-renderer"
+version = "0.1.0"
+dependencies = [
+ "engine",
+]
 
 [[package]]
 name = "byteorder"
@@ -33,6 +39,10 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "cli"
+version = "0.1.0"
 
 [[package]]
 name = "crossterm"
@@ -86,6 +96,13 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi",
+]
+
+[[package]]
+name = "gui"
+version = "0.1.0"
+dependencies = [
+ "crossterm",
 ]
 
 [[package]]
@@ -165,13 +182,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
 dependencies = [
  "zerocopy",
-]
-
-[[package]]
-name = "printer"
-version = "0.1.0"
-dependencies = [
- "engine",
 ]
 
 [[package]]
