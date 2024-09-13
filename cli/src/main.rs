@@ -1,13 +1,27 @@
-use cursive::align::{Align, HAlign, VAlign};
-use cursive::views::TextView;
+mod theme_builder;
+
+use crate::theme_builder::default;
+use cursive::align::Align;
+use cursive::traits::Resizable;
+use cursive::views::{Button, DummyView, LinearLayout, TextView};
+use cursive::{CursiveRunnable, With};
 
 fn main() {
-    let mut siv = cursive::default();
-    siv.add_global_callback('q', |s| s.quit());
-    let mut text_view = TextView::new("Hello TUI!\nPress <q> to quit.");
+    let mut cursive: CursiveRunnable = cursive::default();
 
-    text_view = text_view.align(Align::new(HAlign::Left, VAlign::Top));
+    cursive.set_theme(default());
 
-    siv.add_layer(text_view);
-    siv.run();
+    let horizontal_layout =
+        LinearLayout::vertical()
+            .child(TextView::new("Welcome to backgammon game").align(Align::top_center()))
+            .child(DummyView)
+            .child(Button::new("Play", |s| { s.pop_layer(); }))
+            .child(Button::new("Rules", |s| { s.pop_layer(); }))
+            .child(Button::new("Settings", |s| { s.pop_layer(); }))
+            .child(Button::new("Exit", |s| { s.quit() }))
+            .full_screen();
+
+    cursive.add_layer(horizontal_layout);
+
+    cursive.run();
 }
