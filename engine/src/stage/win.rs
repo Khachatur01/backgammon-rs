@@ -12,8 +12,8 @@ pub struct Win {
 }
 
 impl Stage for Win {
-    fn white_checkers(&self) -> &Checkers { &self.board.white_checkers }
-    fn black_checkers(&self) -> &Checkers { &self.board.black_checkers }
+    fn white_checkers(&self) -> Checkers { self.board.white_checkers }
+    fn black_checkers(&self) -> Checkers { self.board.black_checkers }
     fn active_side(&self) -> Option<Side> { Some(self.active_side) }
     fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { None }

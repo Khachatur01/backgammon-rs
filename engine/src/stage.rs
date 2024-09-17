@@ -14,9 +14,9 @@ pub mod moves_commited;
 pub mod no_possible_moves;
 pub mod after_throwing_dices;
 
-pub trait Stage {
-    fn white_checkers(&self) -> &Checkers;
-    fn black_checkers(&self) -> &Checkers;
+pub trait Stage: Send + Sync {
+    fn white_checkers(&self) -> Checkers;
+    fn black_checkers(&self) -> Checkers;
     fn active_side(&self) -> Option<Side>;
     fn dice_pair(&self) -> Option<DicePair>;
     fn taken_checker_pip(&self) -> Option<Pip>;

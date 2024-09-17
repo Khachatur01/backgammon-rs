@@ -1,5 +1,6 @@
 use crate::constant::{CHECKER_PER_PLAYER, PIPS_SIZE};
 
+#[derive(Copy, Clone)]
 pub struct Checkers {
     pub on_board: [u8; PIPS_SIZE as usize],
     pub bore_off_count: u8,

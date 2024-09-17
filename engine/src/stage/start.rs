@@ -14,8 +14,8 @@ pub struct Start {
 }
 
 impl Stage for Start {
-    fn white_checkers(&self) -> &Checkers { &self.board.white_checkers }
-    fn black_checkers(&self) -> &Checkers { &self.board.black_checkers }
+    fn white_checkers(&self) -> Checkers { self.board.white_checkers }
+    fn black_checkers(&self) -> Checkers { self.board.black_checkers }
     fn active_side(&self) -> Option<Side> { None }
     fn dice_pair(&self) -> Option<DicePair> { None }
     fn taken_checker_pip(&self) -> Option<Pip> { None }
