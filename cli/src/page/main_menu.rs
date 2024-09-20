@@ -10,8 +10,8 @@ pub mod play;
 pub mod rules;
 pub mod settings;
 
-pub fn open_main_menu_page(s: &mut Cursive) {
-    s.pop_layer();
+pub fn open_main_menu_page(cursive: &mut Cursive) {
+    cursive.pop_layer();
 
     let horizontal_layout =
         LinearLayout::vertical()
@@ -23,5 +23,5 @@ pub fn open_main_menu_page(s: &mut Cursive) {
             .child(Button::new("Exit", |s| { s.quit() }))
             .full_screen();
 
-    s.add_layer(horizontal_layout);
+    cursive.add_layer(horizontal_layout);
 }

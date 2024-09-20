@@ -1,1 +1,1 @@
-pub mod stage;
+pub mod stage_view;

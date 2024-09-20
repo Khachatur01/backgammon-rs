@@ -1,5 +1,5 @@
 use cursive::Cursive;
 
-pub fn open_network_game_page(s: &mut Cursive) {
-    s.pop_layer();
+pub fn open_network_game_page(cursive: &mut Cursive) {
+    cursive.pop_layer();
 }

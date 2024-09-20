@@ -10,8 +10,8 @@ use cursive::traits::Resizable;
 use cursive::views::{Button, LinearLayout};
 use cursive::Cursive;
 
-pub fn open_play_page(s: &mut Cursive) {
-    s.pop_layer();
+pub fn open_play_page(cursive: &mut Cursive) {
+    cursive.pop_layer();
 
     let horizontal_layout =
         LinearLayout::vertical()
@@ -21,5 +21,5 @@ pub fn open_play_page(s: &mut Cursive) {
             .child(Button::new("Back", open_main_menu_page))
             .full_screen();
 
-    s.add_layer(horizontal_layout);
+    cursive.add_layer(horizontal_layout);
 }
