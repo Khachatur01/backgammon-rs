@@ -23,8 +23,8 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         up: '⮝',
         down: '⮟',
         right: '⮞',
-        half_width: HalfWidth::new(18),
-        height: Height::new(30),
+        half_width: HalfWidth::new(12),
+        height: Height::new(15),
     };
 
     let start_stage: Start = start_game();

@@ -25,6 +25,7 @@ impl View for StageView {
 
         self.render_borders(printer);
         self.render_separators(printer);
+        self.render_peaces(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {
         //     printer.print(
@@ -128,6 +129,41 @@ impl StageView {
                     (separator_x, row.y),
                     &pips_separator
                 );
+
+                printer.print(
+                    (separator_x, row.y),
+                    &pips_separator
+                );
+            }
+        }
+    }
+
+    fn render_peaces(&self, printer: &Printer) {
+        let half_width: usize = *self.theme.half_width;
+        let white_checker: char = self.theme.white_checker;
+        let black_checker: char = self.theme.black_checker;
+
+        let white_checker: String = white_checker.to_string();
+        let black_checker: String = black_checker.to_string();
+
+        let pip_size: usize = half_width / 6;
+
+        let top_rows: [Row; 2] = [
+            self.get_top_left_row(),
+            self.get_top_right_row(),
+        ];
+
+        let bottom_rows: [Row; 2] = [
+            self.get_bottom_left_row(),
+            self.get_bottom_right_row(),
+        ];
+
+        for row in top_rows {
+            for (index, separator_x) in row.range.step_by(pip_size).enumerate() {
+                printer.print(
+                    (separator_x + pip_size / 2, row.y),
+                    &white_checker
+                );
             }
         }
     }
@@ -135,52 +171,60 @@ impl StageView {
 
 impl StageView {
     fn get_top_left_row(&self) -> Row {
-        let half_width: usize = *self.theme.half_width;
-
         Row {
-            range: Range {
-                start: 0,
-                end: half_width
-            },
+            range: self.get_left_range(),
             y: 1
         }
     }
-
     fn get_top_right_row(&self) -> Row {
-        let half_width: usize = *self.theme.half_width;
-
         Row {
-            range: Range {
-                start: half_width + 1,
-                end: half_width + 2 + half_width - 1
-            },
+            range: self.get_right_range(),
             y: 1
         }
     }
 
     fn get_bottom_left_row(&self) -> Row {
-        let half_width: usize = *self.theme.half_width;
         let height: usize = *self.theme.height;
 
         Row {
-            range: Range {
-                start: 0,
-                end: half_width
-            },
+            range: self.get_left_range(),
+            y: height
+        }
+    }
+    fn get_bottom_right_row(&self) -> Row {
+        let height: usize = *self.theme.height;
+
+        Row {
+            range: self.get_right_range(),
             y: height
         }
     }
 
-    fn get_bottom_right_row(&self) -> Row {
+    fn get_left_range(&self) -> Range<usize> {
         let half_width: usize = *self.theme.half_width;
-        let height: usize = *self.theme.height;
 
-        Row {
-            range: Range {
-                start: half_width + 1,
-                end: half_width + 2 + half_width - 1
-            },
-            y: height
+        Range {
+            start: 0,
+            end: half_width
         }
+    }
+    fn get_right_range(&self) -> Range<usize> {
+        let half_width: usize = *self.theme.half_width;
+
+        Range {
+            start: half_width + 1,
+            end: half_width + 2 + half_width - 1
+        }
+    }
+}
+
+impl StageView {
+    fn get_top_left_checkers(&self) -> Vec<u8> {
+        let (active_side_checkers, opponent_side_checkers) = match self.active_side {
+            Some(Side::White) | None => (&self.white_checkers, &self.black_checkers),
+            Some(Side::Black) => (&self.black_checkers, &self.white_checkers),
+        };
+
+        vec![]
     }
 }
