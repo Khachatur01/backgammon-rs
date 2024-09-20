@@ -148,21 +148,130 @@ impl StageView {
 
         let pip_size: usize = half_width / 6;
 
-        let top_rows: [Row; 2] = [
-            self.get_top_left_row(),
-            self.get_top_right_row(),
-        ];
+        let top_left_row: Row = self.get_top_left_row();
+        let top_right_row: Row = self.get_top_right_row();
+        let bottom_left_row: Row = self.get_bottom_left_row();
+        let bottom_right_row: Row = self.get_bottom_right_row();
 
-        let bottom_rows: [Row; 2] = [
-            self.get_bottom_left_row(),
-            self.get_bottom_right_row(),
-        ];
+        let (active_side_checkers,
+            active_checker,
+            opponent_side_checkers,
+            opponent_checker
+        ) = match self.active_side {
+            Some(Side::White) | None => (
+                &self.white_checkers,
+                white_checker,
+                &self.black_checkers,
+                black_checker,
+            ),
+            Some(Side::Black) => (
+                &self.black_checkers,
+                black_checker,
+                &self.white_checkers,
+                white_checker,
+            ),
+        };
 
-        for row in top_rows {
-            for (index, separator_x) in row.range.step_by(pip_size).enumerate() {
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        let peaces = top_left_row
+            .range
+            .step_by(pip_size)
+            .map(|x| x + pip_size / 2)
+            .enumerate();
+
+        for (index, separator_x) in peaces {
+            let active_side_checkers: usize = active_side_checkers.on_board[index + 12] as usize;
+            let opponent_side_checkers: usize = opponent_side_checkers.on_board[index] as usize;
+
+            for checker in 0..active_side_checkers {
                 printer.print(
-                    (separator_x + pip_size / 2, row.y),
-                    &white_checker
+                    (separator_x, top_left_row.y + checker),
+                    &active_checker
+                );
+            }
+
+            for checker in 0..opponent_side_checkers {
+                printer.print(
+                    (separator_x, top_left_row.y + checker),
+                    &opponent_checker
+                );
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        let peaces = top_right_row
+            .range
+            .step_by(pip_size)
+            .map(|x| x + pip_size / 2)
+            .enumerate();
+
+        for (index, separator_x) in peaces {
+            let active_side_checkers: usize = active_side_checkers.on_board[6 + index + 12] as usize;
+            let opponent_side_checkers: usize = opponent_side_checkers.on_board[6 + index] as usize;
+
+            for checker in 0..active_side_checkers {
+                printer.print(
+                    (separator_x, top_right_row.y + checker),
+                    &active_checker
+                );
+            }
+
+            for checker in 0..opponent_side_checkers {
+                printer.print(
+                    (separator_x, top_right_row.y + checker),
+                    &opponent_checker
+                );
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        let peaces = bottom_left_row
+            .range
+            .step_by(pip_size)
+            .map(|x| x + pip_size / 2)
+            .enumerate();
+
+        for (index, separator_x) in peaces {
+            let active_side_checkers: usize = active_side_checkers.on_board[11 - index] as usize;
+            let opponent_side_checkers: usize = opponent_side_checkers.on_board[23 - index] as usize;
+
+            for checker in 0..active_side_checkers {
+                printer.print(
+                    (separator_x, bottom_left_row.y - checker),
+                    &active_checker
+                );
+            }
+
+            for checker in 0..opponent_side_checkers {
+                printer.print(
+                    (separator_x, bottom_left_row.y - checker),
+                    &opponent_checker
+                );
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        let peaces = bottom_right_row
+            .range
+            .step_by(pip_size)
+            .map(|x| x + pip_size / 2)
+            .enumerate();
+
+        for (index, separator_x) in peaces {
+            let active_side_checkers: usize = active_side_checkers.on_board[11 - index - 6] as usize;
+            let opponent_side_checkers: usize = opponent_side_checkers.on_board[23 - index - 6] as usize;
+
+            for checker in 0..active_side_checkers {
+                printer.print(
+                    (separator_x, bottom_right_row.y - checker),
+                    &active_checker
+                );
+            }
+
+            for checker in 0..opponent_side_checkers {
+                printer.print(
+                    (separator_x, bottom_right_row.y - checker),
+                    &opponent_checker
                 );
             }
         }
@@ -219,11 +328,13 @@ impl StageView {
 }
 
 impl StageView {
-    fn get_top_left_checkers(&self) -> Vec<u8> {
+    fn get_top_checkers(&self) -> Vec<u8> {
         let (active_side_checkers, opponent_side_checkers) = match self.active_side {
             Some(Side::White) | None => (&self.white_checkers, &self.black_checkers),
             Some(Side::Black) => (&self.black_checkers, &self.white_checkers),
         };
+
+
 
         vec![]
     }
