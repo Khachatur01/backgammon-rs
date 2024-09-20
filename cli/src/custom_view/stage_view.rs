@@ -25,7 +25,7 @@ impl View for StageView {
 
         self.render_borders(printer);
         self.render_separators(printer);
-        self.render_peaces(printer);
+        self.render_checkers(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {
         //     printer.print(
@@ -138,7 +138,7 @@ impl StageView {
         }
     }
 
-    fn render_peaces(&self, printer: &Printer) {
+    fn render_checkers(&self, printer: &Printer) {
         let half_width: usize = *self.theme.half_width;
         let white_checker: char = self.theme.white_checker;
         let black_checker: char = self.theme.black_checker;
