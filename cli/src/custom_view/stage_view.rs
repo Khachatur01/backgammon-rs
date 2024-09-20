@@ -1,3 +1,6 @@
+mod row;
+
+use std::ops::Range;
 use crate::stage_theme::StageTheme;
 use cursive::{Printer, Vec2, View};
 use engine::board::checkers::Checkers;
@@ -5,6 +8,7 @@ use engine::constant::player::Side;
 use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
+use crate::custom_view::stage_view::row::Row;
 
 pub struct StageView {
     white_checkers: Checkers,
@@ -20,6 +24,7 @@ impl View for StageView {
         /* TODO */
 
         self.render_borders(printer);
+        self.render_separators(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {
         //     printer.print(
@@ -52,7 +57,7 @@ impl StageView {
         }
     }
 
-    fn render_borders(&self, printer: &Printer,) {
+    fn render_borders(&self, printer: &Printer) {
         let half_width: usize = *self.theme.half_width;
         let height: usize = *self.theme.height;
         let board_border: char = self.theme.board_border;
@@ -64,7 +69,7 @@ impl StageView {
         let board_border: &str = board_border.as_str();
 
         let horizontal_border: String = std::iter::repeat(board_border)
-            .take(horizontal_border_length)
+            .take(horizontal_border_length - 3)
             .collect::<String>();
 
         let horizontal_border: &str = horizontal_border.as_str();
@@ -83,17 +88,17 @@ impl StageView {
 
             /* 2 separators in the middle */
             printer.print(
-                (half_width + 1, row),
+                (half_width, row),
                 board_border
             );
             printer.print(
-                (half_width + 2, row),
+                (half_width + 1, row),
                 board_border
             );
 
             /* Right border */
             printer.print(
-                (half_width * 2 + 3, row),
+                (half_width * 2 + 1, row),
                 board_border
             );
         }
@@ -102,7 +107,80 @@ impl StageView {
         printer.print((0, height + 1), horizontal_border);
     }
 
-    fn render_separators(&self) {
+    fn render_separators(&self, printer: &Printer) {
+        let half_width: usize = *self.theme.half_width;
+        let pips_separator: char = self.theme.pips_separator;
 
+        let pips_separator: String = pips_separator.to_string();
+
+        let pip_size: usize = half_width / 6;
+
+        let rows: [Row; 4] = [
+            self.get_top_left_row(),
+            self.get_top_right_row(),
+            self.get_bottom_left_row(),
+            self.get_bottom_right_row(),
+        ];
+
+        for row in rows {
+            for separator_x in row.range.step_by(pip_size).skip(1) {
+                printer.print(
+                    (separator_x, row.y),
+                    &pips_separator
+                );
+            }
+        }
+    }
+}
+
+impl StageView {
+    fn get_top_left_row(&self) -> Row {
+        let half_width: usize = *self.theme.half_width;
+
+        Row {
+            range: Range {
+                start: 0,
+                end: half_width
+            },
+            y: 1
+        }
+    }
+
+    fn get_top_right_row(&self) -> Row {
+        let half_width: usize = *self.theme.half_width;
+
+        Row {
+            range: Range {
+                start: half_width + 1,
+                end: half_width + 2 + half_width - 1
+            },
+            y: 1
+        }
+    }
+
+    fn get_bottom_left_row(&self) -> Row {
+        let half_width: usize = *self.theme.half_width;
+        let height: usize = *self.theme.height;
+
+        Row {
+            range: Range {
+                start: 0,
+                end: half_width
+            },
+            y: height
+        }
+    }
+
+    fn get_bottom_right_row(&self) -> Row {
+        let half_width: usize = *self.theme.half_width;
+        let height: usize = *self.theme.height;
+
+        Row {
+            range: Range {
+                start: half_width + 1,
+                end: half_width + 2 + half_width - 1
+            },
+            y: height
+        }
     }
 }

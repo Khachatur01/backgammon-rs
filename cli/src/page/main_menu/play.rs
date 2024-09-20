@@ -1,11 +1,11 @@
 mod local_game;
 mod network_game;
-mod open_play_with_computer_page;
+mod play_with_computer_page;
 
 use crate::page::main_menu::open_main_menu_page;
 use crate::page::main_menu::play::local_game::open_local_game_page;
 use crate::page::main_menu::play::network_game::open_network_game_page;
-use crate::page::main_menu::play::open_play_with_computer_page::open_play_with_computer_page;
+use crate::page::main_menu::play::play_with_computer_page::open_play_with_computer_page;
 use cursive::traits::Resizable;
 use cursive::views::{Button, LinearLayout};
 use cursive::Cursive;
