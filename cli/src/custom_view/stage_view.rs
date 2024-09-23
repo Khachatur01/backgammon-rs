@@ -4,6 +4,7 @@ use std::ops::Range;
 use crate::stage_theme::StageTheme;
 use cursive::{Printer, Vec2, View};
 use engine::board::checkers::Checkers;
+use engine::constant::PIPS_SIZE;
 use engine::constant::player::Side;
 use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
@@ -16,6 +17,8 @@ pub struct StageView {
     active_side: Option<Side>,
     dice_pair: Option<DicePair>,
     taken_checker_pip: Option<Pip>,
+
+    render_for: Side,
     theme: StageTheme,
 }
 
@@ -26,6 +29,7 @@ impl View for StageView {
         self.render_borders(printer);
         self.render_separators(printer);
         self.render_checkers(printer);
+        self.render_hints(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {
         //     printer.print(
@@ -47,13 +51,15 @@ impl View for StageView {
 }
 
 impl StageView {
-    pub fn from<T: Stage>(stage: T, theme: StageTheme) -> Self {
+    pub fn from<T: Stage>(stage: T, theme: StageTheme, render_for: Side) -> Self {
         Self {
             white_checkers: stage.white_checkers(),
             black_checkers: stage.black_checkers(),
             active_side: stage.active_side(),
             dice_pair: stage.dice_pair(),
             taken_checker_pip: stage.taken_checker_pip(),
+
+            render_for,
             theme
         }
     }
@@ -148,134 +154,101 @@ impl StageView {
 
         let pip_size: usize = half_width / 6;
 
+        let (active_side_checkers,
+            active_checker,
+            opponent_side_checkers,
+            opponent_checker
+        ) = match self.render_for {
+            Side::White => (
+                self.white_checkers,
+                white_checker,
+                self.black_checkers,
+                black_checker,
+            ),
+            Side::Black => (
+                self.black_checkers,
+                black_checker,
+                self.white_checkers,
+                white_checker,
+            ),
+        };
+
+        let render_peaces = |row: Row,
+                             get_active_side_index: Box<dyn Fn(usize) -> usize>,
+                             get_opponent_side_index: Box<dyn Fn(usize) -> usize>,
+                             direction: isize| {
+
+            let peaces = row
+                .range
+                .step_by(pip_size)
+                .map(|x| x + pip_size / 2)
+                .enumerate();
+
+            let row_y: isize = row.y as isize;
+
+            for (index, separator_x) in peaces {
+                /* define a closure to render peaces of single side */
+                let render_side_peaces = |checkers_count: isize, checker_view: &String| {
+                    for checker_index in 0..checkers_count {
+                        printer.print(
+                            (separator_x, (row_y + checker_index * direction) as usize),
+                            &checker_view
+                        );
+                    }
+                };
+
+                let active_side_index: usize = get_active_side_index(index);
+                let opponent_side_index: usize = get_opponent_side_index(index);
+
+                let active_side_checkers_count: isize = active_side_checkers.on_board[active_side_index] as isize;
+                let opponent_side_checkers_count: isize = opponent_side_checkers.on_board[opponent_side_index] as isize;
+
+                render_side_peaces(active_side_checkers_count, &active_checker);
+                render_side_peaces(opponent_side_checkers_count, &opponent_checker);
+            }
+        };
+
         let top_left_row: Row = self.get_top_left_row();
         let top_right_row: Row = self.get_top_right_row();
         let bottom_left_row: Row = self.get_bottom_left_row();
         let bottom_right_row: Row = self.get_bottom_right_row();
 
-        let (active_side_checkers,
-            active_checker,
-            opponent_side_checkers,
-            opponent_checker
-        ) = match self.active_side {
-            Some(Side::White) | None => (
-                &self.white_checkers,
-                white_checker,
-                &self.black_checkers,
-                black_checker,
-            ),
-            Some(Side::Black) => (
-                &self.black_checkers,
-                black_checker,
-                &self.white_checkers,
-                white_checker,
-            ),
-        };
+        let pips_size: usize = PIPS_SIZE as usize;
+        let pips_size_half: usize = pips_size / 2;
+        let pips_size_quarter: usize = pips_size / 4;
 
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        let peaces = top_left_row
-            .range
-            .step_by(pip_size)
-            .map(|x| x + pip_size / 2)
-            .enumerate();
+        render_peaces(
+            top_left_row,
+            Box::new(|index| pips_size_half + index),
+            Box::new(|index| index),
+            1
+        );
+        render_peaces(
+            top_right_row,
+            Box::new(|index| pips_size_half + (index + pips_size_quarter)),
+            Box::new(|index| index + pips_size_quarter),
+            1
+        );
 
-        for (index, separator_x) in peaces {
-            let active_side_checkers: usize = active_side_checkers.on_board[index + 12] as usize;
-            let opponent_side_checkers: usize = opponent_side_checkers.on_board[index] as usize;
-
-            for checker in 0..active_side_checkers {
-                printer.print(
-                    (separator_x, top_left_row.y + checker),
-                    &active_checker
-                );
-            }
-
-            for checker in 0..opponent_side_checkers {
-                printer.print(
-                    (separator_x, top_left_row.y + checker),
-                    &opponent_checker
-                );
-            }
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        let peaces = top_right_row
-            .range
-            .step_by(pip_size)
-            .map(|x| x + pip_size / 2)
-            .enumerate();
-
-        for (index, separator_x) in peaces {
-            let active_side_checkers: usize = active_side_checkers.on_board[6 + index + 12] as usize;
-            let opponent_side_checkers: usize = opponent_side_checkers.on_board[6 + index] as usize;
-
-            for checker in 0..active_side_checkers {
-                printer.print(
-                    (separator_x, top_right_row.y + checker),
-                    &active_checker
-                );
-            }
-
-            for checker in 0..opponent_side_checkers {
-                printer.print(
-                    (separator_x, top_right_row.y + checker),
-                    &opponent_checker
-                );
-            }
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        let peaces = bottom_left_row
-            .range
-            .step_by(pip_size)
-            .map(|x| x + pip_size / 2)
-            .enumerate();
-
-        for (index, separator_x) in peaces {
-            let active_side_checkers: usize = active_side_checkers.on_board[11 - index] as usize;
-            let opponent_side_checkers: usize = opponent_side_checkers.on_board[23 - index] as usize;
-
-            for checker in 0..active_side_checkers {
-                printer.print(
-                    (separator_x, bottom_left_row.y - checker),
-                    &active_checker
-                );
-            }
-
-            for checker in 0..opponent_side_checkers {
-                printer.print(
-                    (separator_x, bottom_left_row.y - checker),
-                    &opponent_checker
-                );
-            }
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        let peaces = bottom_right_row
-            .range
-            .step_by(pip_size)
-            .map(|x| x + pip_size / 2)
-            .enumerate();
-
-        for (index, separator_x) in peaces {
-            let active_side_checkers: usize = active_side_checkers.on_board[11 - index - 6] as usize;
-            let opponent_side_checkers: usize = opponent_side_checkers.on_board[23 - index - 6] as usize;
-
-            for checker in 0..active_side_checkers {
-                printer.print(
-                    (separator_x, bottom_right_row.y - checker),
-                    &active_checker
-                );
-            }
-
-            for checker in 0..opponent_side_checkers {
-                printer.print(
-                    (separator_x, bottom_right_row.y - checker),
-                    &opponent_checker
-                );
-            }
-        }
+        render_peaces(
+            bottom_left_row,
+            Box::new(|index| pips_size_half - 1 - index),
+            Box::new(|index| pips_size - 1 - index),
+            -1
+        );
+        render_peaces(
+            bottom_right_row,
+            Box::new(|index| pips_size_half - 1 - (index + pips_size_quarter)),
+            Box::new(|index| pips_size - 1 - (index + pips_size_quarter)),
+            -1
+        );
     }
+
+    fn render_hints(&self, printer: &Printer) {
+        /* TODO */
+    }
+
+
 }
 
 impl StageView {
@@ -324,18 +297,5 @@ impl StageView {
             start: half_width + 1,
             end: half_width + 2 + half_width - 1
         }
-    }
-}
-
-impl StageView {
-    fn get_top_checkers(&self) -> Vec<u8> {
-        let (active_side_checkers, opponent_side_checkers) = match self.active_side {
-            Some(Side::White) | None => (&self.white_checkers, &self.black_checkers),
-            Some(Side::Black) => (&self.black_checkers, &self.white_checkers),
-        };
-
-
-
-        vec![]
     }
 }

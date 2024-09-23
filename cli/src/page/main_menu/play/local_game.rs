@@ -1,6 +1,7 @@
 use cursive::traits::Resizable;
 use cursive::views::{DummyView, LinearLayout, TextView};
 use cursive::Cursive;
+use engine::constant::player::Side;
 use engine::stage::start::Start;
 use engine::start_game;
 use crate::custom_view::stage_view::StageView;
@@ -28,7 +29,7 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
     };
 
     let start_stage: Start = start_game();
-    let start_stage_view: StageView = StageView::from(start_stage, stage_theme);
+    let start_stage_view: StageView = StageView::from(start_stage, stage_theme, Side::White);
 
     let board_layout =
         LinearLayout::vertical()
