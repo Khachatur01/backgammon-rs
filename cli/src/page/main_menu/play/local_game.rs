@@ -7,6 +7,7 @@ use engine::start_game;
 use crate::custom_view::stage_view::StageView;
 use crate::stage_theme::half_width::HalfWidth;
 use crate::stage_theme::height::Height;
+use crate::stage_theme::percent::Percent;
 use crate::stage_theme::StageTheme;
 
 pub fn open_local_game_page(cursive: &mut Cursive) {
@@ -26,6 +27,7 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         right: '⮞',
         half_width: HalfWidth::new(12),
         height: Height::new(15),
+        peaces_cut_off_height_percent: Percent::new(40),
     };
 
     let start_stage: Start = start_game();

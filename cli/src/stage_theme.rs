@@ -1,8 +1,11 @@
+use cursive::backends::crossterm::crossterm::event::PushKeyboardEnhancementFlags;
 use crate::stage_theme::half_width::HalfWidth;
 use crate::stage_theme::height::Height;
+use crate::stage_theme::percent::Percent;
 
 pub mod half_width;
 pub mod height;
+pub mod percent;
 
 pub struct StageTheme {
     pub numbers: [char; 15],
@@ -21,6 +24,7 @@ pub struct StageTheme {
     pub half_width: HalfWidth,
     /* height of the board without borders */
     pub height: Height,
+    pub peaces_cut_off_height_percent: Percent
 }
 
 impl StageTheme {

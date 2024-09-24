@@ -153,6 +153,8 @@ impl StageView {
         let black_checker: String = black_checker.to_string();
 
         let pip_size: usize = half_width / 6;
+        let board_height: isize = *self.theme.height as isize;
+        let cut_off_height_percent: isize = *self.theme.peaces_cut_off_height_percent as isize;
 
         let (active_side_checkers,
             active_checker,
@@ -189,7 +191,9 @@ impl StageView {
             for (index, separator_x) in peaces {
                 /* define a closure to render peaces of single side */
                 let render_side_peaces = |checkers_count: isize, checker_view: &String| {
-                    for checker_index in 0..checkers_count {
+                    let cut_off_count: isize = isize::min(checkers_count, board_height * cut_off_height_percent / 100);
+
+                    for checker_index in 0..cut_off_count {
                         printer.print(
                             (separator_x, (row_y + checker_index * direction) as usize),
                             &checker_view
