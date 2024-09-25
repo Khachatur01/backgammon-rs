@@ -25,7 +25,7 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         up: '⮝',
         down: '⮟',
         right: '⮞',
-        half_width: HalfWidth::new(12),
+        half_width: HalfWidth::new(18),
         height: Height::new(15),
         peaces_cut_off_height_percent: Percent::new(40),
     };

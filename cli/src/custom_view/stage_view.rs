@@ -199,6 +199,13 @@ impl StageView {
                             &checker_view
                         );
                     }
+
+                    if checkers_count > cut_off_count {
+                        printer.print(
+                            (separator_x, (row_y + cut_off_count * direction) as usize),
+                            &self.theme.numbers[(checkers_count - 1) as usize].to_string()
+                        );
+                    }
                 };
 
                 let active_side_index: usize = get_active_side_index(index);
@@ -251,8 +258,6 @@ impl StageView {
     fn render_hints(&self, printer: &Printer) {
         /* TODO */
     }
-
-
 }
 
 impl StageView {
