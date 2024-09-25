@@ -24,6 +24,7 @@ pub struct StageTheme {
     pub half_width: HalfWidth,
     /* height of the board without borders */
     pub height: Height,
+    /* cut off peaces if their height is greater than N % of board height */
     pub peaces_cut_off_height_percent: Percent
 }
 

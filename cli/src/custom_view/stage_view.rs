@@ -28,7 +28,8 @@ impl View for StageView {
 
         self.render_borders(printer);
         self.render_separators(printer);
-        self.render_checkers(printer);
+        self.render_board_checkers(printer);
+        self.render_bore_off_checkers(printer);
         self.render_hints(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {
@@ -144,7 +145,7 @@ impl StageView {
         }
     }
 
-    fn render_checkers(&self, printer: &Printer) {
+    fn render_board_checkers(&self, printer: &Printer) {
         let half_width: usize = *self.theme.half_width;
         let white_checker: char = self.theme.white_checker;
         let black_checker: char = self.theme.black_checker;
@@ -253,6 +254,10 @@ impl StageView {
             Box::new(|index| pips_size - 1 - (index + pips_size_quarter)),
             -1
         );
+    }
+
+    fn render_bore_off_checkers(&self, printer: &Printer) {
+
     }
 
     fn render_hints(&self, printer: &Printer) {
