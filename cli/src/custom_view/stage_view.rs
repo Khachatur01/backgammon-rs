@@ -69,6 +69,7 @@ impl StageView {
         let half_width: usize = *self.theme.half_width;
         let height: usize = *self.theme.height;
         let board_border: char = self.theme.board_border;
+        let bore_off_width: usize = self.theme.bore_off_width;
 
         /* Calculations */
         let (horizontal_border_length, vertical_border_length) = self.theme.get_max_size();
@@ -77,7 +78,7 @@ impl StageView {
         let board_border: &str = board_border.as_str();
 
         let horizontal_border: String = std::iter::repeat(board_border)
-            .take(horizontal_border_length - 3)
+            .take(horizontal_border_length - 2)
             .collect::<String>();
 
         let horizontal_border: &str = horizontal_border.as_str();
@@ -93,25 +94,33 @@ impl StageView {
                 (0, row),
                 board_border
             );
+            printer.print(
+                (1 + bore_off_width, row),
+                board_border
+            );
 
             /* 2 separators in the middle */
             printer.print(
-                (half_width, row),
+                (1 + bore_off_width + half_width, row),
                 board_border
             );
             printer.print(
-                (half_width + 1, row),
+                (1 + bore_off_width + half_width + 1, row),
                 board_border
             );
 
             /* Right border */
             printer.print(
-                (half_width * 2 + 1, row),
+                (1 + bore_off_width + half_width * 2 + 1, row),
+                board_border
+            );
+            printer.print(
+                (1 + bore_off_width + half_width * 2 + 1 + bore_off_width + 1, row),
                 board_border
             );
         }
 
-        /* Top bottom */
+        /* Bottom border */
         printer.print((0, height + 1), horizontal_border);
     }
 
@@ -298,18 +307,20 @@ impl StageView {
 
     fn get_left_range(&self) -> Range<usize> {
         let half_width: usize = *self.theme.half_width;
+        let bore_off_width: usize = self.theme.bore_off_width;
 
         Range {
-            start: 0,
+            start: 1 + bore_off_width,
             end: half_width
         }
     }
     fn get_right_range(&self) -> Range<usize> {
         let half_width: usize = *self.theme.half_width;
+        let bore_off_width: usize = self.theme.bore_off_width;
 
         Range {
-            start: half_width + 1,
-            end: half_width + 2 + half_width - 1
+            start: 1 + bore_off_width + half_width + 1,
+            end: 1 + bore_off_width + half_width + 2 + half_width - 1
         }
     }
 }
