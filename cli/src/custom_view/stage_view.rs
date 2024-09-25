@@ -69,7 +69,7 @@ impl StageView {
         let half_width: usize = *self.theme.half_width;
         let height: usize = *self.theme.height;
         let board_border: char = self.theme.board_border;
-        let bore_off_width: usize = self.theme.bore_off_width;
+        let bore_off_column_width: usize = self.theme.bore_off_column_width;
 
         /* Calculations */
         let (horizontal_border_length, vertical_border_length) = self.theme.get_max_size();
@@ -95,27 +95,27 @@ impl StageView {
                 board_border
             );
             printer.print(
-                (1 + bore_off_width, row),
+                (1 + bore_off_column_width, row),
                 board_border
             );
 
             /* 2 separators in the middle */
             printer.print(
-                (1 + bore_off_width + half_width, row),
+                (1 + bore_off_column_width + half_width, row),
                 board_border
             );
             printer.print(
-                (1 + bore_off_width + half_width + 1, row),
+                (1 + bore_off_column_width + half_width + 1, row),
                 board_border
             );
 
             /* Right border */
             printer.print(
-                (1 + bore_off_width + half_width * 2 + 1, row),
+                (1 + bore_off_column_width + half_width * 2 + 1, row),
                 board_border
             );
             printer.print(
-                (1 + bore_off_width + half_width * 2 + 1 + bore_off_width + 1, row),
+                (1 + bore_off_column_width + half_width * 2 + 1 + bore_off_column_width + 1, row),
                 board_border
             );
         }
@@ -266,7 +266,7 @@ impl StageView {
     }
 
     fn render_bore_off_checkers(&self, printer: &Printer) {
-
+        /* TODO */
     }
 
     fn render_hints(&self, printer: &Printer) {
@@ -307,7 +307,7 @@ impl StageView {
 
     fn get_left_range(&self) -> Range<usize> {
         let half_width: usize = *self.theme.half_width;
-        let bore_off_width: usize = self.theme.bore_off_width;
+        let bore_off_width: usize = self.theme.bore_off_column_width;
 
         Range {
             start: 1 + bore_off_width,
@@ -316,7 +316,7 @@ impl StageView {
     }
     fn get_right_range(&self) -> Range<usize> {
         let half_width: usize = *self.theme.half_width;
-        let bore_off_width: usize = self.theme.bore_off_width;
+        let bore_off_width: usize = self.theme.bore_off_column_width;
 
         Range {
             start: 1 + bore_off_width + half_width + 1,

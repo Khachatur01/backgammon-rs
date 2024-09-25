@@ -24,14 +24,14 @@ pub struct StageTheme {
     pub half_width: HalfWidth,
     /* height of the board without borders */
     pub height: Height,
-    pub bore_off_width: usize,
+    pub bore_off_column_width: usize,
     /* cut off peaces if their height is greater than N % of board height */
     pub peaces_cut_off_height_percent: Percent
 }
 
 impl StageTheme {
     pub fn get_max_size(&self) -> (usize, usize) {
-        let horizontal_border_length: usize = 1 + self.bore_off_width + 1 + *self.half_width + 2 + *self.half_width + self.bore_off_width + 1;
+        let horizontal_border_length: usize = 1 + self.bore_off_column_width + 1 + *self.half_width + 2 + *self.half_width + self.bore_off_column_width + 1;
         let vertical_border_length: usize = 1 + *self.height + 1;
 
         (horizontal_border_length, vertical_border_length)
