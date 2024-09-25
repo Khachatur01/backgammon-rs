@@ -52,7 +52,7 @@ impl View for StageView {
 }
 
 impl StageView {
-    pub fn from<T: Stage>(stage: T, theme: StageTheme, render_for: Side) -> Self {
+    pub fn from<T: Stage>(stage: &T, theme: StageTheme, render_for: Side) -> Self {
         Self {
             white_checkers: stage.white_checkers(),
             black_checkers: stage.black_checkers(),

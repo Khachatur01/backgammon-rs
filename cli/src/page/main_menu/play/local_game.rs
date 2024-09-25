@@ -1,7 +1,10 @@
-use cursive::traits::Resizable;
+use std::mem::swap;
+use std::rc::Rc;
+use cursive::traits::{Nameable, Resizable};
 use cursive::views::{DummyView, LinearLayout, TextView};
 use cursive::Cursive;
 use engine::constant::player::Side;
+use engine::stage::PossibleStage;
 use engine::stage::start::Start;
 use engine::start_game;
 use crate::custom_view::stage_view::StageView;
@@ -31,12 +34,11 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         peaces_cut_off_height_percent: Percent::new(40),
     };
 
-    let start_stage: Start = start_game();
-    let start_stage_view: StageView = StageView::from(start_stage, stage_theme, Side::White);
+    let mut current_stage: Rc<PossibleStage> = Rc::new(PossibleStage::Start(start_game()));
 
     let board_layout =
         LinearLayout::vertical()
-            .child(start_stage_view);
+            .with_name("board");
 
     let information_layout =
         LinearLayout::vertical()
@@ -50,4 +52,46 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
             .full_screen();
 
     cursive.add_layer(vertical_layout);
+
+
+    cursive.call_on_name("board", |view: &mut LinearLayout| {
+        view.remove_child(0);
+        let mut current_stage = current_stage.clone();
+
+        match current_stage {
+            PossibleStage::Start(start) => {
+                let start_stage_view: StageView = StageView::from(&start, stage_theme, Side::White);
+                view.add_child(start_stage_view);
+
+                Rc::new(PossibleStage::DicesThrown(start.throw_dices()))
+            }
+            PossibleStage::DicesThrown(dicesThrown) => {
+                Rc::new(PossibleStage::DicesThrown(dicesThrown))
+            }
+            PossibleStage::AfterThrowingDices(afterThrowingDices) => {
+                Rc::new(PossibleStage::AfterThrowingDices(afterThrowingDices))
+            }
+            PossibleStage::CheckerTaken(checkerTaken) => {
+                Rc::new(PossibleStage::CheckerTaken(checkerTaken))
+            }
+            PossibleStage::CheckerMoved(checkerMoved) => {
+                Rc::new(PossibleStage::CheckerMoved(checkerMoved))
+            }
+            PossibleStage::NoPossibleMoves(noPossibleMoves) => {
+                Rc::new(PossibleStage::NoPossibleMoves(noPossibleMoves))
+            }
+            PossibleStage::OutOfMoves(outOfMoves) => {
+                Rc::new(PossibleStage::OutOfMoves(outOfMoves))
+            }
+            PossibleStage::MovesCommited(movesCommited) => {
+                Rc::new(PossibleStage::MovesCommited(movesCommited))
+            }
+            PossibleStage::SideSwitched(sideSwitched) => {
+                Rc::new(PossibleStage::SideSwitched(sideSwitched))
+            }
+            PossibleStage::Win(win) => {
+                Rc::new(PossibleStage::Win(win))
+            }
+        }
+    });
 }
