@@ -34,7 +34,7 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         peaces_cut_off_height_percent: Percent::new(40),
     };
 
-    let mut current_stage: Rc<PossibleStage> = Rc::new(PossibleStage::Start(start_game()));
+    let mut current_stage: PossibleStage = PossibleStage::Start(start_game());
 
     let board_layout =
         LinearLayout::vertical()
@@ -56,7 +56,6 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
 
     cursive.call_on_name("board", |view: &mut LinearLayout| {
         view.remove_child(0);
-        let mut current_stage = current_stage.clone();
 
         match current_stage {
             PossibleStage::Start(start) => {
@@ -65,29 +64,29 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
 
                 Rc::new(PossibleStage::DicesThrown(start.throw_dices()))
             }
-            PossibleStage::DicesThrown(dicesThrown) => {
-                Rc::new(PossibleStage::DicesThrown(dicesThrown))
+            PossibleStage::DicesThrown(dices_thrown) => {
+                Rc::new(PossibleStage::DicesThrown(dices_thrown))
             }
-            PossibleStage::AfterThrowingDices(afterThrowingDices) => {
-                Rc::new(PossibleStage::AfterThrowingDices(afterThrowingDices))
+            PossibleStage::AfterThrowingDices(after_throwing_dices) => {
+                Rc::new(PossibleStage::AfterThrowingDices(after_throwing_dices))
             }
-            PossibleStage::CheckerTaken(checkerTaken) => {
-                Rc::new(PossibleStage::CheckerTaken(checkerTaken))
+            PossibleStage::CheckerTaken(checker_taken) => {
+                Rc::new(PossibleStage::CheckerTaken(checker_taken))
             }
-            PossibleStage::CheckerMoved(checkerMoved) => {
-                Rc::new(PossibleStage::CheckerMoved(checkerMoved))
+            PossibleStage::CheckerMoved(checker_moved) => {
+                Rc::new(PossibleStage::CheckerMoved(checker_moved))
             }
-            PossibleStage::NoPossibleMoves(noPossibleMoves) => {
-                Rc::new(PossibleStage::NoPossibleMoves(noPossibleMoves))
+            PossibleStage::NoPossibleMoves(no_possible_moves) => {
+                Rc::new(PossibleStage::NoPossibleMoves(no_possible_moves))
             }
-            PossibleStage::OutOfMoves(outOfMoves) => {
-                Rc::new(PossibleStage::OutOfMoves(outOfMoves))
+            PossibleStage::OutOfMoves(out_of_moves) => {
+                Rc::new(PossibleStage::OutOfMoves(out_of_moves))
             }
-            PossibleStage::MovesCommited(movesCommited) => {
-                Rc::new(PossibleStage::MovesCommited(movesCommited))
+            PossibleStage::MovesCommited(moves_commited) => {
+                Rc::new(PossibleStage::MovesCommited(moves_commited))
             }
-            PossibleStage::SideSwitched(sideSwitched) => {
-                Rc::new(PossibleStage::SideSwitched(sideSwitched))
+            PossibleStage::SideSwitched(side_switched) => {
+                Rc::new(PossibleStage::SideSwitched(side_switched))
             }
             PossibleStage::Win(win) => {
                 Rc::new(PossibleStage::Win(win))
