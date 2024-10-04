@@ -2,6 +2,7 @@ mod theme_builder;
 mod page;
 mod custom_view;
 mod stage_theme;
+mod backgammon;
 
 use crate::page::main_menu::open_main_menu_page;
 use crate::theme_builder::default;

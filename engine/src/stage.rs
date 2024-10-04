@@ -8,12 +8,12 @@ use crate::stage::moves_commited::MovesCommited;
 use crate::stage::no_possible_moves::NoPossibleMoves;
 use crate::stage::out_of_moves::OutOfMoves;
 use crate::stage::side_switched::SideSwitched;
-use crate::stage::start::Start;
+use crate::stage::started::Started;
 use crate::stage::win::Win;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
 
-pub mod start;
+pub mod started;
 pub mod dices_thrown;
 pub mod checker_taken;
 pub mod out_of_moves;
@@ -33,7 +33,8 @@ pub trait Stage {
 }
 
 pub enum PossibleStage {
-    Start(Start),
+    NotStarted,
+    Started(Started),
     DicesThrown(DicesThrown),
     AfterThrowingDices(AfterThrowingDices),
     CheckerTaken(CheckerTaken),

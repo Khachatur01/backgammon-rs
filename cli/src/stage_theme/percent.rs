@@ -1,5 +1,6 @@
 use std::ops::Deref;
 
+#[derive(Copy, Clone)]
 pub struct Percent(u8);
 
 impl Percent {

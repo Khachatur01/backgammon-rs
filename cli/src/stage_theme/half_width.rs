@@ -1,5 +1,6 @@
 use std::ops::Deref;
 
+#[derive(Copy, Clone)]
 pub struct HalfWidth(usize);
 
 impl HalfWidth {

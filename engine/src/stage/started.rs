@@ -8,12 +8,12 @@ use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
 use rand::Rng;
 
-pub struct Start {
+pub struct Started {
     board: Board,
     done_moves: Vec<CheckerMove>,
 }
 
-impl Stage for Start {
+impl Stage for Started {
     fn white_checkers(&self) -> Checkers { self.board.white_checkers }
     fn black_checkers(&self) -> Checkers { self.board.black_checkers }
     fn active_side(&self) -> Option<Side> { None }
@@ -21,7 +21,7 @@ impl Stage for Start {
     fn taken_checker_pip(&self) -> Option<Pip> { None }
 }
 
-impl Start {
+impl Started {
     pub fn new(board: Board, done_moves: Vec<CheckerMove>) -> Self {
         Self {
             board, done_moves

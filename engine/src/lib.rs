@@ -4,8 +4,8 @@ pub mod types;
 pub mod stage;
 
 use crate::board::Board;
-use crate::stage::start::Start;
+use crate::stage::started::Started;
 
-pub fn start_game() -> Start {
-    Start::new(Board::default(), vec![])
+pub fn start_game() -> Started {
+    Started::new(Board::default(), vec![])
 }

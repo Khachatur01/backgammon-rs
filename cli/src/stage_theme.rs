@@ -7,6 +7,7 @@ pub mod half_width;
 pub mod height;
 pub mod percent;
 
+#[derive(Copy, Clone)]
 pub struct StageTheme {
     pub numbers: [char; 15],
     pub dices: [char; 6],

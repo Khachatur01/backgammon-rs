@@ -3,6 +3,8 @@ mod row;
 use std::ops::Range;
 use crate::stage_theme::StageTheme;
 use cursive::{Printer, Vec2, View};
+use cursive::event::{Event, EventResult};
+use cursive::reexports::ahash::{HashMap, HashMapExt};
 use engine::board::checkers::Checkers;
 use engine::constant::PIPS_SIZE;
 use engine::constant::player::Side;
@@ -10,6 +12,8 @@ use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
 use crate::custom_view::stage_view::row::Row;
+
+type EventHandler = Box<dyn Fn(Event) -> () + Send + Sync + 'static>;
 
 pub struct StageView {
     white_checkers: Checkers,
@@ -20,35 +24,6 @@ pub struct StageView {
 
     render_for: Side,
     theme: StageTheme,
-}
-
-impl View for StageView {
-    fn draw(&self, printer: &Printer) {
-        /* TODO */
-
-        self.render_borders(printer);
-        self.render_separators(printer);
-        self.render_board_checkers(printer);
-        self.render_bore_off_checkers(printer);
-        self.render_hints(printer);
-
-        // printer.with_color(ColorStyle::title_primary(), |printer| {
-        //     printer.print(
-        //         (0, 0),
-        //         &"123456789abcdef"
-        //     );
-        //     printer.print(
-        //         (0, 1),
-        //         &"123456789abcdef"
-        //     )
-        // });
-    }
-
-    fn required_size(&mut self, _: Vec2) -> Vec2 {
-        let (width, height) = self.theme.get_max_size();
-
-        Vec2::new(width, height)
-    }
 }
 
 impl StageView {
@@ -322,5 +297,32 @@ impl StageView {
             start: 1 + bore_off_width + half_width + 1,
             end: 1 + bore_off_width + half_width + 2 + half_width - 1
         }
+    }
+}
+
+impl View for StageView {
+    fn draw(&self, printer: &Printer) {
+        self.render_borders(printer);
+        self.render_separators(printer);
+        self.render_board_checkers(printer);
+        self.render_bore_off_checkers(printer);
+        self.render_hints(printer);
+
+        // printer.with_color(ColorStyle::title_primary(), |printer| {
+        //     printer.print(
+        //         (0, 0),
+        //         &"123456789abcdef"
+        //     );
+        //     printer.print(
+        //         (0, 1),
+        //         &"123456789abcdef"
+        //     )
+        // });
+    }
+
+    fn required_size(&mut self, _: Vec2) -> Vec2 {
+        let (width, height) = self.theme.get_max_size();
+
+        Vec2::new(width, height)
     }
 }
