@@ -7,12 +7,36 @@ use cursive::views::{DummyView, LinearLayout, TextView};
 use cursive::{Cursive, View};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use crate::stage_theme::half_width::HalfWidth;
+use crate::stage_theme::height::Height;
+use crate::stage_theme::percent::Percent;
+use crate::stage_theme::StageTheme;
 
 pub fn open_local_game_page(cursive: &mut Cursive) {
     cursive.pop_layer();
     cursive.set_autorefresh(true);
 
-    let (event_sender, view_receiver) = backgammon::new();
+    let stage_theme: StageTheme = StageTheme {
+        numbers: ['⑴', '⑵', '⑶', '⑷', '⑸', '⑹', '⑺', '⑻', '⑼', '⑽', '⑾', '⑿', '⒀', '⒁', '⒂'],
+        dices: ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'],
+        board_border: '█',
+        space: ' ',
+        pips_separator: '|',
+        white_checker: '⛂',
+        black_checker: '⛀',
+        possible_move: '🞙',
+        focused_pip: '⯌',
+        up: '🖢',
+        down: '🖣',
+        right: '🖝',
+        left: '🖜',
+        half_width: HalfWidth::new(18),
+        bore_off_column_width: 1,
+        height: Height::new(20),
+        peaces_cut_off_height_percent: Percent::new(40),
+    };
+
+    let (event_sender, view_receiver) = backgammon::new(stage_theme);
 
     let mut current_stage_view: Arc<Mutex<Option<StageView>>> = Arc::new(Mutex::new(None));
 

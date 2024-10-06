@@ -261,6 +261,7 @@ impl StageView {
     }
 
     fn render_focused_pip(&self, printer: &Printer) {
+        /* TODO */
         if let Some(focused_pip) = self.focused_pip {
             printer.print(
                 (4, 4),
