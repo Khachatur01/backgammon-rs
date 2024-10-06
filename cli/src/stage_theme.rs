@@ -1,4 +1,3 @@
-use cursive::backends::crossterm::crossterm::event::PushKeyboardEnhancementFlags;
 use crate::stage_theme::half_width::HalfWidth;
 use crate::stage_theme::height::Height;
 use crate::stage_theme::percent::Percent;
@@ -17,9 +16,11 @@ pub struct StageTheme {
     pub white_checker: char,
     pub black_checker: char,
     pub possible_move: char,
+    pub focused_pip: char,
     pub up: char,
     pub down: char,
     pub right: char,
+    pub left: char,
 
     /* width of the board's half without borders */
     pub half_width: HalfWidth,

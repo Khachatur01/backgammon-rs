@@ -1,7 +1,7 @@
 use cursive::align::Align;
-use cursive::Cursive;
 use cursive::traits::Resizable;
 use cursive::views::{Button, DummyView, LinearLayout, TextView};
+use cursive::Cursive;
 use play::open_play_page;
 use rules::open_rules_page;
 use settings::open_settings_page;

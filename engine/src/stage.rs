@@ -30,10 +30,10 @@ pub trait Stage {
     fn active_side(&self) -> Option<Side>;
     fn dice_pair(&self) -> Option<DicePair>;
     fn taken_checker_pip(&self) -> Option<Pip>;
+    fn focused_pip(&self) -> Option<Pip>;
 }
 
 pub enum PossibleStage {
-    NotStarted,
     Started(Started),
     DicesThrown(DicesThrown),
     AfterThrowingDices(AfterThrowingDices),

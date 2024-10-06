@@ -20,6 +20,7 @@ impl Stage for NoPossibleMoves {
     fn active_side(&self) -> Option<Side> { Some(self.active_side) }
     fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { None }
+    fn focused_pip(&self) -> Option<Pip> { None }
 }
 
 impl NoPossibleMoves {

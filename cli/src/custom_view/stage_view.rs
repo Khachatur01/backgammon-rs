@@ -1,17 +1,17 @@
 mod row;
 
-use std::ops::Range;
+use crate::custom_view::stage_view::row::Row;
 use crate::stage_theme::StageTheme;
+use cursive::event::Event;
+use cursive::reexports::ahash::HashMapExt;
 use cursive::{Printer, Vec2, View};
-use cursive::event::{Event, EventResult};
-use cursive::reexports::ahash::{HashMap, HashMapExt};
 use engine::board::checkers::Checkers;
-use engine::constant::PIPS_SIZE;
 use engine::constant::player::Side;
+use engine::constant::PIPS_SIZE;
 use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
-use crate::custom_view::stage_view::row::Row;
+use std::ops::Range;
 
 type EventHandler = Box<dyn Fn(Event) -> () + Send + Sync + 'static>;
 
@@ -21,6 +21,7 @@ pub struct StageView {
     active_side: Option<Side>,
     dice_pair: Option<DicePair>,
     taken_checker_pip: Option<Pip>,
+    focused_pip: Option<Pip>,
 
     render_for: Side,
     theme: StageTheme,
@@ -34,6 +35,7 @@ impl StageView {
             active_side: stage.active_side(),
             dice_pair: stage.dice_pair(),
             taken_checker_pip: stage.taken_checker_pip(),
+            focused_pip: stage.focused_pip(),
 
             render_for,
             theme
@@ -244,8 +246,27 @@ impl StageView {
         /* TODO */
     }
 
+    fn render_dices(&self, printer: &Printer) {
+        /* TODO */
+        if let Some(dice_pair) = self.dice_pair {
+            printer.print(
+                (5, 5),
+                &format!("{} {}", &dice_pair.first(), &dice_pair.second())
+            );
+        }
+    }
+
     fn render_hints(&self, printer: &Printer) {
         /* TODO */
+    }
+
+    fn render_focused_pip(&self, printer: &Printer) {
+        if let Some(focused_pip) = self.focused_pip {
+            printer.print(
+                (4, 4),
+                &format!("{}", &*focused_pip)
+            );
+        }
     }
 }
 
@@ -306,7 +327,9 @@ impl View for StageView {
         self.render_separators(printer);
         self.render_board_checkers(printer);
         self.render_bore_off_checkers(printer);
+        self.render_dices(printer);
         self.render_hints(printer);
+        self.render_focused_pip(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {
         //     printer.print(

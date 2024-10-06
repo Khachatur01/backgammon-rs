@@ -1,4 +1,3 @@
-use rand::Rng;
 use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::player::Side;
@@ -9,6 +8,7 @@ use crate::stage::Stage;
 use crate::types::checker_move::CheckerMove;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
+use rand::Rng;
 
 pub struct SideSwitched {
     board: Board,
@@ -23,6 +23,7 @@ impl Stage for SideSwitched {
     fn active_side(&self) -> Option<Side> { Some(self.active_side) }
     fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { None }
+    fn focused_pip(&self) -> Option<Pip> { None }
 }
 
 impl SideSwitched {

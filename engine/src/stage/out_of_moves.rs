@@ -1,8 +1,8 @@
-use crate::stage::dices_thrown::DicesThrown;
 use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::error::CommitError;
 use crate::constant::player::Side;
+use crate::stage::dices_thrown::DicesThrown;
 use crate::stage::moves_commited::MovesCommited;
 use crate::stage::side_switched::SideSwitched;
 use crate::stage::win::Win;
@@ -24,6 +24,7 @@ impl Stage for OutOfMoves {
     fn active_side(&self) -> Option<Side> { Some(self.active_side) }
     fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { None }
+    fn focused_pip(&self) -> Option<Pip> { None }
 }
 
 impl OutOfMoves {

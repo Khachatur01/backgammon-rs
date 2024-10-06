@@ -1,9 +1,9 @@
 use crate::board::checkers::Checkers;
 use crate::constant::player::Side;
+use crate::constant::result::CheckerAvailability;
 use crate::constant::PIPS_SIZE;
 use crate::types::checker_move::CheckerMove;
 use crate::types::checker_move::CheckerMove::{BearOff, Play};
-use crate::constant::result::CheckerAvailability;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
 

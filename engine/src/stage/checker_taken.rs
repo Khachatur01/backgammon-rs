@@ -1,11 +1,11 @@
-use crate::stage::dices_thrown::DicesThrown;
-use crate::stage::out_of_moves::OutOfMoves;
 use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::error::{BearOffError, MoveError};
 use crate::constant::player::Side;
 use crate::constant::result::CheckerAvailability;
 use crate::stage::checker_moved::CheckerMoved;
+use crate::stage::dices_thrown::DicesThrown;
+use crate::stage::out_of_moves::OutOfMoves;
 use crate::stage::Stage;
 use crate::types::checker_move::CheckerMove;
 use crate::types::dice_pair::DicePair;
@@ -17,6 +17,7 @@ pub struct CheckerTaken {
     from_pip: Pip,
     active_side: Side,
     dice_pair: DicePair,
+    focused_pip: Pip,
 }
 
 impl Stage for CheckerTaken {
@@ -25,6 +26,7 @@ impl Stage for CheckerTaken {
     fn active_side(&self) -> Option<Side> { Some(self.active_side) }
     fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { Some(self.from_pip) }
+    fn focused_pip(&self) -> Option<Pip> { Some(self.focused_pip) }
 }
 
 impl CheckerTaken {
@@ -39,15 +41,21 @@ impl CheckerTaken {
             done_moves,
             from_pip,
             active_side,
-            dice_pair
+            dice_pair,
+            focused_pip: Pip::new(0)
         }
     }
 
-    pub fn play_checker(mut self, to_pip: Pip) -> Result<CheckerMoved, MoveError> {
-        let from_pip: Pip = self.from_pip;
-        let play: CheckerMove = CheckerMove::Play(from_pip, to_pip);
+    pub fn focus_pip(&mut self, pip: Pip) {
+        self.focused_pip = pip;
+    }
 
-        self.check_target_pip_availability(to_pip)?;
+
+    pub fn play_checker(mut self) -> Result<CheckerMoved, MoveError> {
+        let from_pip: Pip = self.from_pip;
+        let play: CheckerMove = CheckerMove::Play(from_pip, self.focused_pip);
+
+        self.check_target_pip_availability(self.focused_pip)?;
         self.check_if_blocking_opponent(play)?;
         if self.check_move_possibility(play).is_err() {
             return Err(MoveError::InconsistentWithDices)
