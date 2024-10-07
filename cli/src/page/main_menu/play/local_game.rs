@@ -33,8 +33,8 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         left: '🖜',
         half_width: HalfWidth::new(18),
         bore_off_column_width: 1,
-        height: Height::new(20),
-        peaces_cut_off_height_percent: Percent::new(40),
+        height: Height::new(23),
+        peaces_cut_off_height_percent: Percent::new(35),
     };
 
     let (event_sender, view_receiver) = backgammon::new(stage_theme, RenderFor::ActiveSide);

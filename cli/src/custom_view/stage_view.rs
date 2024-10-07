@@ -9,7 +9,7 @@ use cursive::reexports::ahash::HashMapExt;
 use cursive::{Printer, Vec2, View};
 use engine::board::checkers::Checkers;
 use engine::constant::player::Side;
-use engine::constant::PIPS_SIZE;
+use engine::constant::{PIPS_PER_HALF_BOARD, PIPS_SIZE};
 use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
@@ -147,7 +147,7 @@ impl StageView {
         let white_checker: String = white_checker.to_string();
         let black_checker: String = black_checker.to_string();
 
-        let pip_size: usize = half_width / 6;
+        let pip_size: usize = half_width / PIPS_PER_HALF_BOARD as usize;
         let board_height: isize = *self.theme.height as isize;
         let cut_off_height_percent: isize = *self.theme.peaces_cut_off_height_percent as isize;
 
@@ -269,17 +269,35 @@ impl StageView {
     }
 
     fn render_focused_pip(&self, printer: &Printer) {
-        /* TODO */
         if let Some(focused_pip) = self.focused_pip {
-            printer.print(
-                (4, 4),
-                &format!("{}", &*focused_pip)
-            );
+            let (active_side_checkers, opponent_side_checkers) = match self.render_for {
+                Side::White => (
+                    self.white_checkers,
+                    self.black_checkers,
+                ),
+                Side::Black => (
+                    self.black_checkers,
+                    self.white_checkers,
+                ),
+            };
+
+            let checkers = active_side_checkers.on_board
+                .iter()
+                .zip(opponent_side_checkers.on_board.iter());
+
+            for (active_side_checker, opponent_checker) in checkers {
+
+            }
         }
     }
 }
 
 impl StageView {
+    fn get_position(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
+
+        (0, 0)
+    }
+
     fn get_top_left_row(&self) -> Row {
         Row {
             range: self.get_left_range(),
