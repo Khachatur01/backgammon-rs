@@ -117,14 +117,14 @@ fn on_focus_pip(current_stage: PossibleStage,
                     Pip::new(focused_pip + 1)
                 }
             }
-            Key::Up => {
+            Key::Down => {
                 if focused_pip < PIPS_SIZE / 2 {
                     Pip::new(focused_pip)
                 } else {
                     Pip::new(focused_pip - PIPS_SIZE / 2)
                 }
             }
-            Key::Down => {
+            Key::Up => {
                 if focused_pip >= PIPS_SIZE / 2 {
                     Pip::new(focused_pip)
                 } else {

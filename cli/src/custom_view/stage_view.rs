@@ -281,26 +281,59 @@ impl StageView {
                 ),
             };
 
-            let checkers = active_side_checkers.on_board
-                .iter()
-                .zip(opponent_side_checkers.on_board.iter());
-
-            for (active_side_checker, opponent_checker) in checkers {
-
-            }
+            printer.print(
+                self.get_position_for_active_side(focused_pip, active_side_checkers.on_board[*focused_pip as usize] as usize + 1),
+                "a"
+            );
         }
     }
 }
 
 impl StageView {
     fn get_position_for_active_side(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
+        let half_width: usize = *self.theme.half_width;
+        let pip_size: usize = half_width / PIPS_PER_HALF_BOARD as usize;
 
-        (0, 0)
+        let first_board_left: u8 = PIPS_SIZE / 4;
+        let second_board_left: u8 = PIPS_SIZE / 2;
+        let third_board_left: u8 = first_board_left + second_board_left;
+
+        let pip: u8 = *pip;
+
+        if pip < first_board_left { /* 5   4   3   2   1   0 */ /* bottom right */
+            let physical_left: usize = 1 + self.theme.bore_off_column_width + *self.theme.half_width + 1;
+            let offset: usize = (first_board_left - pip - 1) as usize * pip_size + pip_size / 2;
+
+            (physical_left + offset, *self.theme.height - column)
+        } else if pip >= first_board_left && pip < second_board_left { /* 11  10   9   8   7   6 */ /* bottom left */
+            let physical_left: usize = 1 + self.theme.bore_off_column_width;
+            let offset: usize = (second_board_left - pip - 1) as usize * pip_size + pip_size / 2;
+
+            (physical_left + offset, *self.theme.height - column)
+        } else if pip >= second_board_left && pip < third_board_left { /* 12  13  14  15  16  17 */ /* top left */
+            let physical_left: usize = 1 + self.theme.bore_off_column_width;
+            let offset: usize = (pip - second_board_left) as usize * pip_size + pip_size / 2;
+
+            (physical_left + offset, 1 + column)
+        } else if pip >= third_board_left { /* 18  19  20  21  22  23 */ /* top right */
+            let physical_left: usize = 1 + self.theme.bore_off_column_width + *self.theme.half_width + 1;
+            let offset: usize = (pip - third_board_left) as usize * pip_size + pip_size / 2;
+
+            (physical_left + offset, 1 + column)
+        } else {
+            unreachable!()
+        }
     }
 
     fn get_position_for_opponent(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
+        let opponent_pip: Pip =
+            if *pip < PIPS_SIZE / 2 {
+                Pip::new(*pip + PIPS_SIZE / 2)
+            } else {
+                Pip::new(*pip - PIPS_SIZE / 2)
+            };
 
-        (0, 0)
+        self.get_position_for_active_side(opponent_pip, column)
     }
 
     fn get_top_left_row(&self) -> Row {
