@@ -1,16 +1,17 @@
 use crate::backgammon;
 use crate::custom_view::event_handler_view::EventHandlerView;
+use crate::custom_view::stage_view::render_for::RenderFor;
 use crate::custom_view::stage_view::StageView;
-use cursive::event::Event;
-use cursive::traits::Resizable;
-use cursive::views::{DummyView, LinearLayout, TextView};
-use cursive::{Cursive, View};
-use std::sync::{Arc, Mutex};
-use std::thread;
 use crate::stage_theme::half_width::HalfWidth;
 use crate::stage_theme::height::Height;
 use crate::stage_theme::percent::Percent;
 use crate::stage_theme::StageTheme;
+use cursive::event::Event;
+use cursive::traits::Resizable;
+use cursive::views::{DummyView, LinearLayout, TextView};
+use cursive::Cursive;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 pub fn open_local_game_page(cursive: &mut Cursive) {
     cursive.pop_layer();
@@ -36,7 +37,7 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         peaces_cut_off_height_percent: Percent::new(40),
     };
 
-    let (event_sender, view_receiver) = backgammon::new(stage_theme);
+    let (event_sender, view_receiver) = backgammon::new(stage_theme, RenderFor::ActiveSide);
 
     let mut current_stage_view: Arc<Mutex<Option<StageView>>> = Arc::new(Mutex::new(None));
 

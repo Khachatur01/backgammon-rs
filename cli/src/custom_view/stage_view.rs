@@ -1,5 +1,7 @@
 mod row;
+pub mod render_for;
 
+use crate::custom_view::stage_view::render_for::RenderFor;
 use crate::custom_view::stage_view::row::Row;
 use crate::stage_theme::StageTheme;
 use cursive::event::Event;
@@ -28,7 +30,13 @@ pub struct StageView {
 }
 
 impl StageView {
-    pub fn from<T: Stage>(stage: &T, theme: StageTheme, render_for: Side) -> Self {
+    pub fn from<T: Stage>(stage: &T, theme: StageTheme, render_for: RenderFor) -> Self {
+        let render_for = match render_for {
+            RenderFor::WhiteSide => { Side::White },
+            RenderFor::BlackSide => { Side::Black },
+            RenderFor::ActiveSide => { stage.active_side().unwrap_or(Side::White) }
+        };
+
         Self {
             white_checkers: stage.white_checkers(),
             black_checkers: stage.black_checkers(),
