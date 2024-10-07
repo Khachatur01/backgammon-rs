@@ -293,7 +293,12 @@ impl StageView {
 }
 
 impl StageView {
-    fn get_position(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
+    fn get_position_for_active_side(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
+
+        (0, 0)
+    }
+
+    fn get_position_for_opponent(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
 
         (0, 0)
     }
