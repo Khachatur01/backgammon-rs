@@ -281,16 +281,37 @@ impl StageView {
                 ),
             };
 
+            let active_side_checkers_count: usize = active_side_checkers.on_board[*focused_pip as usize] as usize;
+
+            let focused_pip_for_opponent: Pip = self.get_opponent_pip(focused_pip);
+            let opponent_side_checkers_count: usize = opponent_side_checkers.on_board[*focused_pip_for_opponent as usize] as usize;
+
+            let position: (usize, usize) =
+                if active_side_checkers_count > opponent_side_checkers_count {
+                    self.get_position_for_active_side(
+                        focused_pip,
+                        active_side_checkers_count + 1
+                    )
+                } else {
+                    self.get_position_for_opponent(
+                        focused_pip_for_opponent,
+                        opponent_side_checkers_count + 1
+                    )
+                };
+
+            let focused_pip: char = self.theme.focused_pip;
+            let focused_pip: String = focused_pip.to_string();
+
             printer.print(
-                self.get_position_for_active_side(focused_pip, active_side_checkers.on_board[*focused_pip as usize] as usize + 1),
-                "a"
+                position,
+                focused_pip.as_str()
             );
         }
     }
 }
 
 impl StageView {
-    fn get_position_for_active_side(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
+    fn get_position_for_active_side(&self, pip: Pip, column: usize) -> (usize, usize) {
         let half_width: usize = *self.theme.half_width;
         let pip_size: usize = half_width / PIPS_PER_HALF_BOARD as usize;
 
@@ -325,15 +346,18 @@ impl StageView {
         }
     }
 
-    fn get_position_for_opponent(&self, pip: Pip, column: usize) -> impl Into<Vec2> {
-        let opponent_pip: Pip =
-            if *pip < PIPS_SIZE / 2 {
-                Pip::new(*pip + PIPS_SIZE / 2)
-            } else {
-                Pip::new(*pip - PIPS_SIZE / 2)
-            };
+    fn get_position_for_opponent(&self, pip: Pip, column: usize) -> (usize, usize) {
+        let opponent_pip: Pip = self.get_opponent_pip(pip);
 
         self.get_position_for_active_side(opponent_pip, column)
+    }
+
+    fn get_opponent_pip(&self, pip: Pip) -> Pip {
+        if *pip < PIPS_SIZE / 2 {
+            Pip::new(*pip + PIPS_SIZE / 2)
+        } else {
+            Pip::new(*pip - PIPS_SIZE / 2)
+        }
     }
 
     fn get_top_left_row(&self) -> Row {
