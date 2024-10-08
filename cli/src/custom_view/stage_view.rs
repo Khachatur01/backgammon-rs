@@ -8,7 +8,7 @@ use cursive::reexports::ahash::HashMapExt;
 use cursive::{Printer, Vec2, View};
 use engine::board::checkers::Checkers;
 use engine::constant::player::Side;
-use engine::constant::{PIPS_PER_HALF_BOARD, PIPS_SIZE};
+use engine::constant::{PIPS_SIZE};
 use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
@@ -109,44 +109,60 @@ impl StageView {
     }
 
     fn render_separators(&self, printer: &Printer) {
-        let half_width: usize = self.theme.get_half_width();
         let pips_separator: char = self.theme.pips_separator;
-
         let pips_separator: String = pips_separator.to_string();
 
-        for pip_index in (0..PIPS_SIZE) {
-            let pip: Pip = Pip::new(pip_index);
+        let first_board_left: u8 = PIPS_SIZE / 4;
+        let second_board_left: u8 = PIPS_SIZE / 2;
+        let third_board_left: u8 = first_board_left + second_board_left;
+        let pip_size: usize = self.theme.pip_size as usize;
 
-            let (x, y) = self.get_position_for_active_side(pip, 0);
-
-            printer.print(
-                (x, y),
-                &pips_separator
+        /* FIXME */
+        let pips_range = (0..PIPS_SIZE)
+            .filter(|pip_index|
+                *pip_index != 0 &&
+                *pip_index != 6 &&
+                *pip_index != 17 &&
+                *pip_index != 23
             );
-        }
 
-        // let pip_size: usize = half_width / 6;
-        //
-        // let rows: [Row; 4] = [
-        //     self.get_top_left_row(),
-        //     self.get_top_right_row(),
-        //     self.get_bottom_left_row(),
-        //     self.get_bottom_right_row(),
-        // ];
-        //
-        // for row in rows {
-        //     for separator_x in row.range.step_by(pip_size).skip(1) {
-        //         printer.print(
-        //             (separator_x, row.y),
-        //             &pips_separator
-        //         );
-        //
-        //         printer.print(
-        //             (separator_x, row.y),
-        //             &pips_separator
-        //         );
-        //     }
-        // }
+        for pip in pips_range {
+            if pip < second_board_left {
+                let (physical_left, board_left) =
+                    if pip < first_board_left {
+                        /* 5   4   3   2   1   0 */ /* bottom right */
+                        (self.get_right_board_physical_left(), first_board_left)
+                    } else {
+                        /* 11  10   9   8   7   6 */ /* bottom left */
+                         (self.get_left_board_physical_left(), second_board_left)
+                    };
+
+                let n = (board_left - pip) as usize;
+                let x: usize = physical_left + pip_size * n + (n - 1);
+
+                printer.print(
+                    (x, *self.theme.height),
+                    &pips_separator
+                );
+            } else {
+                let (physical_left, board_left) =
+                    if pip < third_board_left {
+                        /* 12  13  14  15  16  17 */ /* top left */
+                        (self.get_left_board_physical_left(), second_board_left)
+                    } else {
+                        /* 18  19  20  21  22  23 */ /* top right */
+                        (self.get_right_board_physical_left(), third_board_left)
+                    };
+
+                let n: usize = (pip - board_left + 1) as usize;
+                let x: usize = physical_left + pip_size * n + (n - 1);
+
+                printer.print(
+                    (x, 1),
+                    &pips_separator
+                );
+            }
+        }
     }
 
     fn render_board_checkers(&self, printer: &Printer) {
@@ -298,7 +314,6 @@ impl StageView {
 
 impl StageView {
     fn get_position_for_active_side(&self, pip: Pip, column: usize) -> (usize, usize) {
-        let half_width: usize = self.theme.get_half_width();
         let pip_size: usize = self.theme.pip_size as usize;
 
         let first_board_left: u8 = PIPS_SIZE / 4;
@@ -308,22 +323,22 @@ impl StageView {
         let pip: u8 = *pip;
 
         if pip < first_board_left { /* 5   4   3   2   1   0 */ /* bottom right */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1 + half_width + 2;
+            let physical_left: usize = self.get_right_board_physical_left();
             let offset: usize = (first_board_left - 1 - pip) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, *self.theme.height - column)
         } else if pip >= first_board_left && pip < second_board_left { /* 11  10   9   8   7   6 */ /* bottom left */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1;
+            let physical_left: usize = self.get_left_board_physical_left();
             let offset: usize = (second_board_left - 1 - pip) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, *self.theme.height - column)
         } else if pip >= second_board_left && pip < third_board_left { /* 12  13  14  15  16  17 */ /* top left */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1;
+            let physical_left: usize = self.get_left_board_physical_left();
             let offset: usize = (pip - second_board_left) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, 1 + column)
         } else if pip >= third_board_left { /* 18  19  20  21  22  23 */ /* top right */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1 + half_width + 2;
+            let physical_left: usize = self.get_right_board_physical_left();
             let offset: usize = (pip - third_board_left) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, 1 + column)
@@ -344,6 +359,14 @@ impl StageView {
         } else {
             Pip::new(*pip - PIPS_SIZE / 2)
         }
+    }
+
+    fn get_left_board_physical_left(&self) -> usize {
+        1 + self.theme.bore_off_column_width + 1
+    }
+
+    fn get_right_board_physical_left(&self) -> usize {
+        1 + self.theme.bore_off_column_width + 1 + self.theme.get_half_width() + 2
     }
 
     // fn get_top_left_row(&self) -> Row {

@@ -2,7 +2,6 @@ use crate::backgammon;
 use crate::custom_view::event_handler_view::EventHandlerView;
 use crate::custom_view::stage_view::render_for::RenderFor;
 use crate::custom_view::stage_view::StageView;
-use crate::stage_theme::half_width::HalfWidth;
 use crate::stage_theme::height::Height;
 use crate::stage_theme::percent::Percent;
 use crate::stage_theme::StageTheme;
