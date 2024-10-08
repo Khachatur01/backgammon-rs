@@ -1,8 +1,7 @@
-use crate::stage_theme::half_width::HalfWidth;
+use engine::constant::PIPS_PER_HALF_BOARD;
 use crate::stage_theme::height::Height;
 use crate::stage_theme::percent::Percent;
 
-pub mod half_width;
 pub mod height;
 pub mod percent;
 
@@ -22,8 +21,7 @@ pub struct StageTheme {
     pub right: char,
     pub left: char,
 
-    /* width of the board's half without borders */
-    pub half_width: HalfWidth,
+    pub pip_size: u8,
     /* height of the board without borders */
     pub height: Height,
     pub bore_off_column_width: usize,
@@ -33,9 +31,22 @@ pub struct StageTheme {
 
 impl StageTheme {
     pub fn get_max_size(&self) -> (usize, usize) {
-        let horizontal_border_length: usize = 1 + self.bore_off_column_width + 1 + *self.half_width + 2 + *self.half_width + self.bore_off_column_width + 1;
+        let half_width: usize = self.get_half_width();
+
+        let horizontal_border_length: usize = 1 + self.bore_off_column_width + 1 + half_width + 2 + half_width + 1 + self.bore_off_column_width + 1;
         let vertical_border_length: usize = 1 + *self.height + 1;
 
         (horizontal_border_length, vertical_border_length)
+    }
+
+    pub fn get_half_width(&self) -> usize {
+        (self.pip_size * PIPS_PER_HALF_BOARD + (PIPS_PER_HALF_BOARD - 1)) as usize
+    }
+
+    pub fn get_max_checkers_to_show(&self) -> usize {
+        let board_height: usize = *self.height;
+        let cut_off_height_percent: usize = *self.peaces_cut_off_height_percent as usize;
+
+        board_height * cut_off_height_percent / 100
     }
 }

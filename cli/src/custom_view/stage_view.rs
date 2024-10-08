@@ -2,7 +2,6 @@ mod row;
 pub mod render_for;
 
 use crate::custom_view::stage_view::render_for::RenderFor;
-use crate::custom_view::stage_view::row::Row;
 use crate::stage_theme::StageTheme;
 use cursive::event::Event;
 use cursive::reexports::ahash::HashMapExt;
@@ -13,7 +12,6 @@ use engine::constant::{PIPS_PER_HALF_BOARD, PIPS_SIZE};
 use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
-use std::ops::Range;
 use std::usize;
 
 type EventHandler = Box<dyn Fn(Event) -> () + Send + Sync + 'static>;
@@ -52,7 +50,7 @@ impl StageView {
     }
 
     fn render_borders(&self, printer: &Printer) {
-        let half_width: usize = *self.theme.half_width;
+        let half_width: usize = self.theme.get_half_width();
         let height: usize = *self.theme.height;
         let board_border: char = self.theme.board_border;
         let bore_off_column_width: usize = self.theme.bore_off_column_width;
@@ -64,7 +62,7 @@ impl StageView {
         let board_border: &str = board_border.as_str();
 
         let horizontal_border: String = std::iter::repeat(board_border)
-            .take(horizontal_border_length - 2)
+            .take(horizontal_border_length)
             .collect::<String>();
 
         let horizontal_border: &str = horizontal_border.as_str();
@@ -87,21 +85,21 @@ impl StageView {
 
             /* 2 separators in the middle */
             printer.print(
-                (1 + bore_off_column_width + half_width, row),
+                (1 + bore_off_column_width + 1 + half_width, row),
                 board_border
             );
             printer.print(
-                (1 + bore_off_column_width + half_width + 1, row),
+                (1 + bore_off_column_width + 1 + half_width + 1, row),
                 board_border
             );
 
             /* Right border */
             printer.print(
-                (1 + bore_off_column_width + half_width * 2 + 1, row),
+                (1 + bore_off_column_width + 1 + half_width + 2 + half_width, row),
                 board_border
             );
             printer.print(
-                (1 + bore_off_column_width + half_width * 2 + 1 + bore_off_column_width + 1, row),
+                (1 + bore_off_column_width + 1 + half_width + 2 + half_width + bore_off_column_width + 1, row),
                 board_border
             );
         }
@@ -111,33 +109,44 @@ impl StageView {
     }
 
     fn render_separators(&self, printer: &Printer) {
-        let half_width: usize = *self.theme.half_width;
+        let half_width: usize = self.theme.get_half_width();
         let pips_separator: char = self.theme.pips_separator;
 
         let pips_separator: String = pips_separator.to_string();
 
-        let pip_size: usize = half_width / 6;
+        for pip_index in (0..PIPS_SIZE) {
+            let pip: Pip = Pip::new(pip_index);
 
-        let rows: [Row; 4] = [
-            self.get_top_left_row(),
-            self.get_top_right_row(),
-            self.get_bottom_left_row(),
-            self.get_bottom_right_row(),
-        ];
+            let (x, y) = self.get_position_for_active_side(pip, 0);
 
-        for row in rows {
-            for separator_x in row.range.step_by(pip_size).skip(1) {
-                printer.print(
-                    (separator_x, row.y),
-                    &pips_separator
-                );
-
-                printer.print(
-                    (separator_x, row.y),
-                    &pips_separator
-                );
-            }
+            printer.print(
+                (x, y),
+                &pips_separator
+            );
         }
+
+        // let pip_size: usize = half_width / 6;
+        //
+        // let rows: [Row; 4] = [
+        //     self.get_top_left_row(),
+        //     self.get_top_right_row(),
+        //     self.get_bottom_left_row(),
+        //     self.get_bottom_right_row(),
+        // ];
+        //
+        // for row in rows {
+        //     for separator_x in row.range.step_by(pip_size).skip(1) {
+        //         printer.print(
+        //             (separator_x, row.y),
+        //             &pips_separator
+        //         );
+        //
+        //         printer.print(
+        //             (separator_x, row.y),
+        //             &pips_separator
+        //         );
+        //     }
+        // }
     }
 
     fn render_board_checkers(&self, printer: &Printer) {
@@ -179,7 +188,7 @@ impl StageView {
         let black_checker: char = self.theme.black_checker;
         let black_checker: String = black_checker.to_string();
 
-        let max_checkers_to_show: usize = self.get_max_checkers_to_show();
+        let max_checkers_to_show: usize = self.theme.get_max_checkers_to_show();
 
         let (active_side_checkers,
             active_side_checker_view,
@@ -257,7 +266,7 @@ impl StageView {
             let focused_pip_for_opponent: Pip = self.get_opponent_pip(focused_pip);
             let opponent_side_checkers_count: usize = opponent_side_checkers.on_board[*focused_pip_for_opponent as usize] as usize;
 
-            let max_checkers_to_show: usize = self.get_max_checkers_to_show();
+            let max_checkers_to_show: usize = self.theme.get_max_checkers_to_show();
 
             let position: (usize, usize) =
                 if active_side_checkers_count > opponent_side_checkers_count {
@@ -289,8 +298,8 @@ impl StageView {
 
 impl StageView {
     fn get_position_for_active_side(&self, pip: Pip, column: usize) -> (usize, usize) {
-        let half_width: usize = *self.theme.half_width;
-        let pip_size: usize = half_width / PIPS_PER_HALF_BOARD as usize;
+        let half_width: usize = self.theme.get_half_width();
+        let pip_size: usize = self.theme.pip_size as usize;
 
         let first_board_left: u8 = PIPS_SIZE / 4;
         let second_board_left: u8 = PIPS_SIZE / 2;
@@ -299,23 +308,23 @@ impl StageView {
         let pip: u8 = *pip;
 
         if pip < first_board_left { /* 5   4   3   2   1   0 */ /* bottom right */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width + *self.theme.half_width + 1;
-            let offset: usize = (first_board_left - pip - 1) as usize * pip_size + pip_size / 2;
+            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1 + half_width + 2;
+            let offset: usize = (first_board_left - 1 - pip) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, *self.theme.height - column)
         } else if pip >= first_board_left && pip < second_board_left { /* 11  10   9   8   7   6 */ /* bottom left */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width;
-            let offset: usize = (second_board_left - pip - 1) as usize * pip_size + pip_size / 2;
+            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1;
+            let offset: usize = (second_board_left - 1 - pip) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, *self.theme.height - column)
         } else if pip >= second_board_left && pip < third_board_left { /* 12  13  14  15  16  17 */ /* top left */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width;
-            let offset: usize = (pip - second_board_left) as usize * pip_size + pip_size / 2;
+            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1;
+            let offset: usize = (pip - second_board_left) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, 1 + column)
         } else if pip >= third_board_left { /* 18  19  20  21  22  23 */ /* top right */
-            let physical_left: usize = 1 + self.theme.bore_off_column_width + *self.theme.half_width + 1;
-            let offset: usize = (pip - third_board_left) as usize * pip_size + pip_size / 2;
+            let physical_left: usize = 1 + self.theme.bore_off_column_width + 1 + half_width + 2;
+            let offset: usize = (pip - third_board_left) as usize * (pip_size + 1) + pip_size / 2;
 
             (physical_left + offset, 1 + column)
         } else {
@@ -337,61 +346,54 @@ impl StageView {
         }
     }
 
-    fn get_max_checkers_to_show(&self) -> usize {
-        let board_height: usize = *self.theme.height;
-        let cut_off_height_percent: usize = *self.theme.peaces_cut_off_height_percent as usize;
-
-        board_height * cut_off_height_percent / 100
-    }
-
-    fn get_top_left_row(&self) -> Row {
-        Row {
-            range: self.get_left_range(),
-            y: 1
-        }
-    }
-    fn get_top_right_row(&self) -> Row {
-        Row {
-            range: self.get_right_range(),
-            y: 1
-        }
-    }
-
-    fn get_bottom_left_row(&self) -> Row {
-        let height: usize = *self.theme.height;
-
-        Row {
-            range: self.get_left_range(),
-            y: height
-        }
-    }
-    fn get_bottom_right_row(&self) -> Row {
-        let height: usize = *self.theme.height;
-
-        Row {
-            range: self.get_right_range(),
-            y: height
-        }
-    }
-
-    fn get_left_range(&self) -> Range<usize> {
-        let half_width: usize = *self.theme.half_width;
-        let bore_off_width: usize = self.theme.bore_off_column_width;
-
-        Range {
-            start: 1 + bore_off_width,
-            end: half_width
-        }
-    }
-    fn get_right_range(&self) -> Range<usize> {
-        let half_width: usize = *self.theme.half_width;
-        let bore_off_width: usize = self.theme.bore_off_column_width;
-
-        Range {
-            start: 1 + bore_off_width + half_width + 1,
-            end: 1 + bore_off_width + half_width + 2 + half_width - 1
-        }
-    }
+    // fn get_top_left_row(&self) -> Row {
+    //     Row {
+    //         range: self.get_left_range(),
+    //         y: 1
+    //     }
+    // }
+    // fn get_top_right_row(&self) -> Row {
+    //     Row {
+    //         range: self.get_right_range(),
+    //         y: 1
+    //     }
+    // }
+    //
+    // fn get_bottom_left_row(&self) -> Row {
+    //     let height: usize = *self.theme.height;
+    //
+    //     Row {
+    //         range: self.get_left_range(),
+    //         y: height
+    //     }
+    // }
+    // fn get_bottom_right_row(&self) -> Row {
+    //     let height: usize = *self.theme.height;
+    //
+    //     Row {
+    //         range: self.get_right_range(),
+    //         y: height
+    //     }
+    // }
+    //
+    // fn get_left_range(&self) -> Range<usize> {
+    //     let half_width: usize = *self.theme.half_width;
+    //     let bore_off_width: usize = self.theme.bore_off_column_width;
+    //
+    //     Range {
+    //         start: 1 + bore_off_width,
+    //         end: half_width
+    //     }
+    // }
+    // fn get_right_range(&self) -> Range<usize> {
+    //     let half_width: usize = *self.theme.half_width;
+    //     let bore_off_width: usize = self.theme.bore_off_column_width;
+    //
+    //     Range {
+    //         start: 1 + bore_off_width + half_width + 1,
+    //         end: 1 + bore_off_width + half_width + 2 + half_width - 1
+    //     }
+    // }
 }
 
 impl View for StageView {
