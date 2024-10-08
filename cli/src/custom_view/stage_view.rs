@@ -14,6 +14,7 @@ use engine::stage::Stage;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
 use std::ops::Range;
+use std::usize;
 
 type EventHandler = Box<dyn Fn(Event) -> () + Send + Sync + 'static>;
 
@@ -140,21 +141,50 @@ impl StageView {
     }
 
     fn render_board_checkers(&self, printer: &Printer) {
-        let half_width: usize = *self.theme.half_width;
-        let white_checker: char = self.theme.white_checker;
-        let black_checker: char = self.theme.black_checker;
+        fn render_checkers(this: &StageView,
+                           checkers: Checkers,
+                           checker_view: String,
+                           printer: &Printer,
+                           max_checkers_to_show: usize,
+                           get_position: impl Fn(&StageView, Pip, usize) -> (usize, usize)) {
 
+            for (pip, active_side_checkers_in_pip) in checkers.on_board.iter().enumerate() {
+                let active_side_checkers_in_pip: usize = *active_side_checkers_in_pip as usize;
+                let cut_off_count: usize = usize::min(active_side_checkers_in_pip, max_checkers_to_show);
+
+                for column in 0..cut_off_count {
+                    let pip: Pip = Pip::new(pip as u8);
+                    let position: (usize, usize) = get_position(this, pip, column);
+                    printer.print(
+                        position,
+                        &checker_view
+                    );
+                }
+
+                if active_side_checkers_in_pip > cut_off_count {
+                    let pip: Pip = Pip::new(pip as u8);
+                    let position: (usize, usize) = get_position(this, pip, cut_off_count);
+
+                    printer.print(
+                        position,
+                        &this.theme.numbers[active_side_checkers_in_pip - 1].to_string()
+                    );
+                }
+            }
+        }
+
+        let white_checker: char = self.theme.white_checker;
         let white_checker: String = white_checker.to_string();
+
+        let black_checker: char = self.theme.black_checker;
         let black_checker: String = black_checker.to_string();
 
-        let pip_size: usize = half_width / PIPS_PER_HALF_BOARD as usize;
-        let board_height: isize = *self.theme.height as isize;
-        let cut_off_height_percent: isize = *self.theme.peaces_cut_off_height_percent as isize;
+        let max_checkers_to_show: usize = self.get_max_checkers_to_show();
 
         let (active_side_checkers,
-            active_checker,
+            active_side_checker_view,
             opponent_side_checkers,
-            opponent_checker
+            opponent_checker_view
         ) = match self.render_for {
             Side::White => (
                 self.white_checkers,
@@ -170,83 +200,24 @@ impl StageView {
             ),
         };
 
-        let render_peaces = |row: Row,
-                             get_active_side_index: Box<dyn Fn(usize) -> usize>,
-                             get_opponent_side_index: Box<dyn Fn(usize) -> usize>,
-                             direction: isize| {
-
-            let peaces = row
-                .range
-                .step_by(pip_size)
-                .map(|x| x + pip_size / 2)
-                .enumerate();
-
-            let row_y: isize = row.y as isize;
-
-            for (index, separator_x) in peaces {
-                /* define a closure to render peaces of single side */
-                let render_side_peaces = |checkers_count: isize, checker_view: &String| {
-                    let cut_off_count: isize = isize::min(checkers_count, board_height * cut_off_height_percent / 100);
-
-                    for checker_index in 0..cut_off_count {
-                        printer.print(
-                            (separator_x, (row_y + checker_index * direction) as usize),
-                            &checker_view
-                        );
-                    }
-
-                    if checkers_count > cut_off_count {
-                        printer.print(
-                            (separator_x, (row_y + cut_off_count * direction) as usize),
-                            &self.theme.numbers[(checkers_count - 1) as usize].to_string()
-                        );
-                    }
-                };
-
-                let active_side_index: usize = get_active_side_index(index);
-                let opponent_side_index: usize = get_opponent_side_index(index);
-
-                let active_side_checkers_count: isize = active_side_checkers.on_board[active_side_index] as isize;
-                let opponent_side_checkers_count: isize = opponent_side_checkers.on_board[opponent_side_index] as isize;
-
-                render_side_peaces(active_side_checkers_count, &active_checker);
-                render_side_peaces(opponent_side_checkers_count, &opponent_checker);
-            }
-        };
-
-        let top_left_row: Row = self.get_top_left_row();
-        let top_right_row: Row = self.get_top_right_row();
-        let bottom_left_row: Row = self.get_bottom_left_row();
-        let bottom_right_row: Row = self.get_bottom_right_row();
-
-        let pips_size: usize = PIPS_SIZE as usize;
-        let pips_size_half: usize = pips_size / 2;
-        let pips_size_quarter: usize = pips_size / 4;
-
-        render_peaces(
-            top_left_row,
-            Box::new(|index| pips_size_half + index),
-            Box::new(|index| index),
-            1
-        );
-        render_peaces(
-            top_right_row,
-            Box::new(|index| pips_size_half + (index + pips_size_quarter)),
-            Box::new(|index| index + pips_size_quarter),
-            1
+        render_checkers(self,
+                        active_side_checkers,
+                        active_side_checker_view,
+                        printer,
+                        max_checkers_to_show,
+                        |_, pip, column| {
+                            self.get_position_for_active_side(pip, column)
+                        }
         );
 
-        render_peaces(
-            bottom_left_row,
-            Box::new(|index| pips_size_half - 1 - index),
-            Box::new(|index| pips_size - 1 - index),
-            -1
-        );
-        render_peaces(
-            bottom_right_row,
-            Box::new(|index| pips_size_half - 1 - (index + pips_size_quarter)),
-            Box::new(|index| pips_size - 1 - (index + pips_size_quarter)),
-            -1
+        render_checkers(self,
+                        opponent_side_checkers,
+                        opponent_checker_view,
+                        printer,
+                        max_checkers_to_show,
+                        |_, pip, column| {
+                            self.get_position_for_opponent(pip, column)
+                        }
         );
     }
 
@@ -286,16 +257,22 @@ impl StageView {
             let focused_pip_for_opponent: Pip = self.get_opponent_pip(focused_pip);
             let opponent_side_checkers_count: usize = opponent_side_checkers.on_board[*focused_pip_for_opponent as usize] as usize;
 
+            let max_checkers_to_show: usize = self.get_max_checkers_to_show();
+
             let position: (usize, usize) =
                 if active_side_checkers_count > opponent_side_checkers_count {
+                    let cut_off_count: usize = usize::min(active_side_checkers_count, max_checkers_to_show);
+
                     self.get_position_for_active_side(
                         focused_pip,
-                        active_side_checkers_count + 1
+                        cut_off_count + 1
                     )
                 } else {
+                    let cut_off_count: usize = usize::min(opponent_side_checkers_count, max_checkers_to_show);
+
                     self.get_position_for_opponent(
                         focused_pip_for_opponent,
-                        opponent_side_checkers_count + 1
+                        cut_off_count + 1
                     )
                 };
 
@@ -358,6 +335,13 @@ impl StageView {
         } else {
             Pip::new(*pip - PIPS_SIZE / 2)
         }
+    }
+
+    fn get_max_checkers_to_show(&self) -> usize {
+        let board_height: usize = *self.theme.height;
+        let cut_off_height_percent: usize = *self.theme.peaces_cut_off_height_percent as usize;
+
+        board_height * cut_off_height_percent / 100
     }
 
     fn get_top_left_row(&self) -> Row {
