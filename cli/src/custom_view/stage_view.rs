@@ -137,11 +137,11 @@ impl StageView {
                          (self.get_left_board_physical_left(), second_board_left)
                     };
 
-                let n = (board_left - pip) as usize;
-                let x: usize = physical_left + pip_size * n + (n - 1);
+                let n: usize = (board_left - pip) as usize;
+                let x_position: usize = physical_left + pip_size * n + (n - 1);
 
                 printer.print(
-                    (x, *self.theme.height),
+                    (x_position, *self.theme.height),
                     &pips_separator
                 );
             } else {
@@ -154,11 +154,11 @@ impl StageView {
                         (self.get_right_board_physical_left(), third_board_left)
                     };
 
-                let n: usize = (pip - board_left + 1) as usize;
-                let x: usize = physical_left + pip_size * n + (n - 1);
+                let n: usize = (pip - board_left) as usize;
+                let x_position: usize = physical_left + pip_size * (n + 1) + n;
 
                 printer.print(
-                    (x, 1),
+                    (x_position, 1),
                     &pips_separator
                 );
             }
