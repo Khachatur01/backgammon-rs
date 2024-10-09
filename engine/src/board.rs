@@ -9,7 +9,6 @@ use crate::types::pip::Pip;
 
 pub mod checkers;
 
-#[derive(Default)]
 /**
 Board pips schema (Looking from point of view Active Player):
 
@@ -37,6 +36,7 @@ Expanded:
     Opponent:
         11  10  9   8   7   6      5   4   3   2   1   0  >--+ +--< 23  22  21  20  19  18      17  16  15  14  13  12
 */
+#[derive(Default)]
 pub struct Board {
     pub(crate) white_checkers: Checkers,
     pub(crate) black_checkers: Checkers,
