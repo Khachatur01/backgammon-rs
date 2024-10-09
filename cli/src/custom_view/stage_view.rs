@@ -247,11 +247,25 @@ impl StageView {
     }
 
     fn render_dices(&self, printer: &Printer) {
-        /* TODO */
         if let Some(dice_pair) = self.dice_pair {
+            let first_dice_view: char = self.theme.dices[(dice_pair.first() - 1) as usize];
+            let first_dice_number: char = self.theme.numbers[(dice_pair.first() - 1) as usize];
+
+            let second_dice_view: char = self.theme.dices[(dice_pair.second() - 1) as usize];
+            let second_dice_number: char = self.theme.numbers[(dice_pair.second() - 1) as usize];
+
+            let y_position: usize = (*self.theme.height) / 2 + 1;
+
+            let left_board_middle_position: usize = self.get_left_board_physical_left() + self.theme.get_half_width() / 2;
+            let right_board_middle_position: usize = self.get_right_board_physical_left() + self.theme.get_half_width() / 2;
+
             printer.print(
-                (5, 5),
-                &format!("{} {}", &dice_pair.first(), &dice_pair.second())
+                (left_board_middle_position, y_position),
+                &format!("{} {}", &first_dice_view, &first_dice_number)
+            );
+            printer.print(
+                (right_board_middle_position, y_position),
+                &format!("{} {}", &second_dice_view, &second_dice_number)
             );
         }
     }
