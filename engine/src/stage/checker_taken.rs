@@ -52,14 +52,21 @@ impl CheckerTaken {
     }
 
 
-    pub fn play_checker(mut self) -> Result<CheckerMoved, MoveError> {
+    pub fn play_checker(mut self) -> Result<CheckerMoved, MoveError<Self>> {
         let from_pip: Pip = self.from_pip;
         let play: CheckerMove = CheckerMove::Play(from_pip, self.focused_pip);
 
-        self.check_target_pip_availability(self.focused_pip)?;
-        self.check_if_blocking_opponent(play)?;
+        let checker_availability: CheckerAvailability = self.board.get_checker_availability(self.active_side, Pip::from(self.focused_pip));
+        if let CheckerAvailability::ReferringToOpponentPip = checker_availability {
+            return Err(MoveError::PipIsOccupiedByOpponent(self));
+        }
+
+        if self.is_blocking_opponent(play) {
+            return Err(MoveError::BlockingOpponent(self));
+        }
+
         if self.check_move_possibility(play).is_err() {
-            return Err(MoveError::InconsistentWithDices)
+            return Err(MoveError::InconsistentWithDices(self))
         };
 
         let next_stage: CheckerMoved = self.move_checker(play);
@@ -67,17 +74,17 @@ impl CheckerTaken {
         Ok(next_stage)
     }
 
-    pub fn bear_off_checker(mut self) -> Result<CheckerMoved, BearOffError> {
+    pub fn bear_off_checker(mut self) -> Result<CheckerMoved, BearOffError<Self>> {
         let active_side: Side = self.active_side;
         let from_pip: Pip = self.from_pip;
         let bear_off: CheckerMove = CheckerMove::BearOff(from_pip);
 
         if !self.board.are_all_checkers_in_home(active_side) {
-            return Err(BearOffError::NotAllCheckersAreInHome);
+            return Err(BearOffError::NotAllCheckersAreInHome(self));
         }
 
         if self.check_move_possibility(bear_off).is_err() {
-            return Err(BearOffError::InconsistentWithDices)
+            return Err(BearOffError::InconsistentWithDices(self))
         };
 
         let next_stage: CheckerMoved = self.move_checker(CheckerMove::BearOff(from_pip));
@@ -87,13 +94,6 @@ impl CheckerTaken {
 
     pub fn cancel(self) -> DicesThrown {
         DicesThrown::new(self.board, self.done_moves, self.active_side, self.dice_pair)
-    }
-
-    fn check_target_pip_availability(&self, to_pip: Pip) -> Result<(), MoveError> {
-        match self.board.get_checker_availability(self.active_side, Pip::from(to_pip)) {
-            CheckerAvailability::ReferringToOpponentPip => Err(MoveError::PipIsOccupiedByOpponent),
-            _ => Ok(())
-        }
     }
 
     fn check_move_possibility(&self, checker_move: CheckerMove) -> Result<(), ()> {
@@ -122,18 +122,12 @@ impl CheckerTaken {
         Ok(())
     }
 
-    fn check_if_blocking_opponent(&self, checker_move: CheckerMove) -> Result<(), MoveError> {
-        let is_blocking: bool = match checker_move {
+    fn is_blocking_opponent(&self, checker_move: CheckerMove) -> bool {
+        match checker_move {
             CheckerMove::Play(from_pip, to_pip) =>
                 self.board.is_blocking_opponent(self.active_side, from_pip, to_pip),
             CheckerMove::BearOff(_) => false,
-        };
-
-        if is_blocking {
-            return Err(MoveError::BlockingOpponent);
         }
-
-        Ok(())
     }
 
     fn move_checker(mut self, checker_move: CheckerMove) -> CheckerMoved {

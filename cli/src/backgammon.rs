@@ -2,13 +2,15 @@ use crate::custom_view::stage_view::render_for::RenderFor;
 use crate::custom_view::stage_view::StageView;
 use crate::stage_theme::StageTheme;
 use cursive::event::{Event, Key};
+use engine::constant::PIPS_SIZE;
 use engine::stage::{PossibleStage, Stage};
 use engine::types::pip::Pip;
 use engine::{stage, start_game};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
-use engine::constant::PIPS_SIZE;
+use engine::constant::error::TakeError;
+use engine::stage::dices_thrown::DicesThrown;
 
 pub fn new(stage_theme: StageTheme, render_for: RenderFor) -> (Sender<Event>, Receiver<StageView>) {
     let (view_sender, view_receiver) = mpsc::channel();
@@ -46,6 +48,15 @@ fn start(stage_theme: StageTheme,
     }
 }
 
+fn send_view(stage: &impl Stage,
+             render_for: RenderFor,
+             stage_theme: StageTheme,
+             view_sender: Sender<StageView>) {
+
+    let dices_thrown_stage_view: StageView = StageView::from(stage, stage_theme, render_for);
+    view_sender.clone().send(dices_thrown_stage_view).unwrap_or(());
+}
+
 fn on_enter(current_stage: PossibleStage,
             render_for: RenderFor,
             stage_theme: StageTheme,
@@ -53,14 +64,27 @@ fn on_enter(current_stage: PossibleStage,
 
     match current_stage {
         PossibleStage::Started(started_stage) => {
-            let dices_thrown_stage: stage::dices_thrown::DicesThrown = started_stage.throw_dices();
-            let dices_thrown_stage_view: StageView = StageView::from(&dices_thrown_stage, stage_theme, render_for);
+            let dices_thrown_stage: DicesThrown = started_stage.throw_dices();
 
-            view_sender.clone().send(dices_thrown_stage_view).unwrap_or(());
+            send_view(&dices_thrown_stage, render_for, stage_theme, view_sender.clone());
+
             PossibleStage::DicesThrown(dices_thrown_stage)
         }
         PossibleStage::DicesThrown(dices_thrown_stage) => {
-            PossibleStage::DicesThrown(dices_thrown_stage)
+            match dices_thrown_stage.take_checker() {
+                Ok(checker_taken_stage) => {
+                    send_view(&checker_taken_stage, render_for, stage_theme, view_sender.clone());
+
+                    PossibleStage::CheckerTaken(checker_taken_stage)
+                }
+                Err(take_error) => {
+                    match take_error {
+                        TakeError::NotEnoughCheckers(dices_thrown_stage) |
+                        TakeError::TakingOpponentPip(dices_thrown_stage) =>
+                            PossibleStage::DicesThrown(dices_thrown_stage)
+                    }
+                }
+            }
         }
         PossibleStage::AfterThrowingDices(after_throwing_dices) => {
             PossibleStage::AfterThrowingDices(after_throwing_dices)

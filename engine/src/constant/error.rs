@@ -1,34 +1,36 @@
+use std::fmt::Display;
+
 #[derive(Debug)]
-pub enum TakeError {
-    NotEnoughCheckers,
-    TakingOpponentPip
+pub enum TakeError<SELF> {
+    NotEnoughCheckers(SELF),
+    TakingOpponentPip(SELF)
 }
 
 #[derive(Debug)]
-pub enum MoveError {
-    BlockingOpponent,
-    PipIsOccupiedByOpponent,
-    InconsistentWithDices
+pub enum MoveError<SELF> {
+    BlockingOpponent(SELF),
+    PipIsOccupiedByOpponent(SELF),
+    InconsistentWithDices(SELF)
 }
 
 #[derive(Debug)]
-pub enum BearOffError {
-    NotAllCheckersAreInHome,
-    InconsistentWithDices
+pub enum BearOffError<SELF> {
+    NotAllCheckersAreInHome(SELF),
+    InconsistentWithDices(SELF)
 }
 
 #[derive(Debug)]
-pub enum CommitError {
-    NotAllDicesPlayed
+pub enum CommitError<SELF> {
+    NotAllDicesPlayed(SELF)
 }
 
 #[derive(Debug)]
-pub enum ThrowDicesError {
-    DicesAlreadyThrown,
-    GameDoesntNotStartedYet
+pub enum ThrowDicesError<SELF> {
+    DicesAlreadyThrown(SELF),
+    GameDoesntNotStartedYet(SELF)
 }
 
 #[derive(Debug)]
-pub enum SwitchSideError {
-    ActiveSideDoesntFinishPlaying
+pub enum SwitchSideError<SELF> {
+    ActiveSideDoesntFinishPlaying(SELF)
 }

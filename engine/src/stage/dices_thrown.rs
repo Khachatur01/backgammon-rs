@@ -46,12 +46,12 @@ impl DicesThrown {
         self.focused_pip = pip;
     }
 
-    pub fn take_checker(self) -> Result<CheckerTaken, TakeError> {
+    pub fn take_checker(self) -> Result<CheckerTaken, TakeError<Self>> {
         match self.board.get_checker_availability(self.active_side, self.focused_pip) {
             CheckerAvailability::NoCheckerFound =>
-                return Err(TakeError::NotEnoughCheckers),
+                return Err(TakeError::NotEnoughCheckers(self)),
             CheckerAvailability::ReferringToOpponentPip =>
-                return Err(TakeError::TakingOpponentPip),
+                return Err(TakeError::TakingOpponentPip(self)),
             _ => {}
         };
 

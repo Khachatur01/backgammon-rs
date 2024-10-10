@@ -41,7 +41,7 @@ impl OutOfMoves {
         }
     }
 
-    pub fn commit_moves(self) -> Result<MovesCommited, CommitError> {
+    pub fn commit_moves(self) -> Result<MovesCommited, CommitError<Self>> {
         let next_stage: MovesCommited = if self.board.has_checkers(self.active_side) {
             /* Switch active side */
             let new_active_side: Side = match self.active_side {
