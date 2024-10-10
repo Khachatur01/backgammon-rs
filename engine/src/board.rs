@@ -275,15 +275,15 @@ impl Board {
             return false;
         }
 
-        /* if opponent checker can't be found on the path of dice moves */
-        let dice_can_be_fully_played: bool = (1..=4)
+        /* if opponent checker can be found on the path of dice moves */
+        let dice_can_not_be_fully_played: bool = (1..=4)
             .filter(|i| i * dice_pair.first() < MAX_PIPS)
             .map(|i| Pip::new(i * dice_pair.first()))
             .find(|pip| self.opponent_has_checker_in_pip(for_side, *pip))
-            .is_none();
+            .is_some();
 
 
         /* if already played from head and dices are equal and dices can't be fully played */
-        !dice_can_be_fully_played
+        dice_can_not_be_fully_played
     }
 }
