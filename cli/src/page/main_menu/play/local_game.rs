@@ -36,7 +36,7 @@ pub fn open_local_game_page(cursive: &mut Cursive) {
         peaces_cut_off_height_percent: Percent::new(35),
     };
 
-    let (event_sender, view_receiver) = backgammon::new(stage_theme, RenderFor::ActiveSide);
+    let (event_sender, view_receiver) = backgammon::Backgammon::run(stage_theme, RenderFor::ActiveSide);
 
     let mut current_stage_view: Arc<Mutex<Option<StageView>>> = Arc::new(Mutex::new(None));
 
