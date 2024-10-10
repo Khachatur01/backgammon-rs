@@ -1,7 +1,7 @@
 use crate::board::checkers::Checkers;
 use crate::board::Board;
 use crate::constant::error::TakeError;
-use crate::constant::PIPS_SIZE;
+use crate::constant::MAX_PIPS;
 use crate::constant::player::Side;
 use crate::constant::result::CheckerAvailability;
 use crate::stage::checker_taken::CheckerTaken;
@@ -38,7 +38,7 @@ impl DicesThrown {
             active_side,
             dice_pair,
             done_moves,
-            focused_pip: Pip::new(PIPS_SIZE - 1)
+            focused_pip: Pip::new(MAX_PIPS - 1)
         }
     }
 

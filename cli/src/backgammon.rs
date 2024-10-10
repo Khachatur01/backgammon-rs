@@ -2,7 +2,7 @@ use crate::custom_view::stage_view::render_for::RenderFor;
 use crate::custom_view::stage_view::StageView;
 use crate::stage_theme::StageTheme;
 use cursive::event::{Event, Key};
-use engine::constant::PIPS_SIZE;
+use engine::constant::MAX_PIPS;
 use engine::stage::{PossibleStage, Stage};
 use engine::types::pip::Pip;
 use engine::{stage, start_game};
@@ -139,37 +139,37 @@ impl Backgammon {
 
             let result_pip = match direction {
                 Key::Left => {
-                    if focused_pip == PIPS_SIZE / 2 || focused_pip == PIPS_SIZE / 2 - 1 {
+                    if focused_pip == MAX_PIPS / 2 || focused_pip == MAX_PIPS / 2 - 1 {
                         Pip::new(focused_pip)
-                    } else if focused_pip < PIPS_SIZE / 2 {
+                    } else if focused_pip < MAX_PIPS / 2 {
                         Pip::new(focused_pip + 1)
                     } else {
                         Pip::new(focused_pip - 1)
                     }
                 }
                 Key::Right => {
-                    if focused_pip == 0 || focused_pip == PIPS_SIZE - 1 {
+                    if focused_pip == 0 || focused_pip == MAX_PIPS - 1 {
                         Pip::new(focused_pip)
-                    } else if focused_pip < PIPS_SIZE / 2 {
+                    } else if focused_pip < MAX_PIPS / 2 {
                         Pip::new(focused_pip - 1)
                     } else {
                         Pip::new(focused_pip + 1)
                     }
                 }
                 Key::Down => {
-                    if focused_pip < PIPS_SIZE / 2 {
+                    if focused_pip < MAX_PIPS / 2 {
                         Pip::new(focused_pip)
                     } else {
                         /* get the pip in front of focused pip */
-                        Pip::new((PIPS_SIZE / 2) - 1 - (focused_pip - PIPS_SIZE / 2))
+                        Pip::new((MAX_PIPS / 2) - 1 - (focused_pip - MAX_PIPS / 2))
                     }
                 }
                 Key::Up => {
-                    if focused_pip >= PIPS_SIZE / 2 {
+                    if focused_pip >= MAX_PIPS / 2 {
                         Pip::new(focused_pip)
                     } else {
                         /* get the pip in front of focused pip */
-                        Pip::new((PIPS_SIZE / 2) + (PIPS_SIZE / 2 - 1 - focused_pip))
+                        Pip::new((MAX_PIPS / 2) + (MAX_PIPS / 2 - 1 - focused_pip))
                     }
                 },
                 _ => {

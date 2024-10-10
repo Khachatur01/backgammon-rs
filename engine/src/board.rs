@@ -1,7 +1,7 @@
 use crate::board::checkers::Checkers;
 use crate::constant::player::Side;
 use crate::constant::result::CheckerAvailability;
-use crate::constant::PIPS_SIZE;
+use crate::constant::{CHECKER_PER_PLAYER, MAX_PIPS, PIPS_PER_HALF_BOARD};
 use crate::types::checker_move::CheckerMove;
 use crate::types::checker_move::CheckerMove::{BearOff, Play};
 use crate::types::dice_pair::DicePair;
@@ -42,6 +42,7 @@ pub struct Board {
     pub(crate) black_checkers: Checkers,
 }
 
+/* public interface */
 impl Board {
     pub fn calculate_pip_count_score(&self, for_side: Side) -> u16 {
         let active_side_checkers: &Checkers = match for_side {
@@ -94,8 +95,8 @@ impl Board {
                                    from: Pip) -> Vec<CheckerMove> {
 
         /* playing from the head */
-        if *from == PIPS_SIZE - 1 {
-
+        if *from == MAX_PIPS - 1 && !self.can_play_from_head(for_side, dice_pair) {
+            return vec![];
         }
 
         /* TODO */
@@ -144,7 +145,7 @@ impl Board {
             Side::Black => &self.black_checkers
         };
 
-        let mut non_home_pips_range = (PIPS_SIZE / 4)..PIPS_SIZE;
+        let mut non_home_pips_range = (MAX_PIPS / 4)..MAX_PIPS;
 
         let has_checker_outside_home: bool = non_home_pips_range.any(|pip_index: u8| {
             active_side_checkers.on_board[pip_index as usize] != 0
@@ -168,7 +169,7 @@ impl Board {
         let target_pip_index: usize = *to_pip as usize;
 
         let right_side: &[u8] = &active_side_checkers.on_board[0..target_pip_index];
-        let left_side: &[u8] = &active_side_checkers.on_board[target_pip_index..PIPS_SIZE as usize];
+        let left_side: &[u8] = &active_side_checkers.on_board[target_pip_index..MAX_PIPS as usize];
 
         let mut continuous_pieces_count: u8 = 0;
 
@@ -221,9 +222,23 @@ impl Board {
             .iter()
             .any(|checkers: &u8| *checkers != 0)
     }
+}
+
+/* private logic */
+impl Board {
+    fn opponent_has_checker_in_pip(&self, for_side: Side, pip: Pip) -> bool {
+        let opponent_pip: Pip = self.to_opponent_pip(pip);
+
+        let opponent_checkers: &Checkers = match for_side {
+            Side::White => &self.black_checkers,
+            Side::Black => &self.white_checkers
+        };
+
+        opponent_checkers.on_board[*opponent_pip as usize] != 0
+    }
 
     fn to_opponent_pip(&self, pip: Pip) -> Pip {
-        let half_count: u8 = PIPS_SIZE / 2;
+        let half_count: u8 = MAX_PIPS / 2;
 
         if *pip >= half_count {
             Pip::new(*pip - half_count)
@@ -239,8 +254,36 @@ impl Board {
         };
 
         active_side_checkers
-            .on_board[*pip as usize..PIPS_SIZE as usize]
+            .on_board[*pip as usize..MAX_PIPS as usize]
             .iter()
             .any(|checkers: &u8| *checkers > 0)
+    }
+
+    fn can_play_from_head(&self, for_side: Side, dice_pair: DicePair) -> bool {
+        let active_side_checkers: &Checkers = match for_side {
+            Side::White => &self.white_checkers,
+            Side::Black => &self.black_checkers
+        };
+
+        /* if not played from head yet */
+        if active_side_checkers[MAX_PIPS - 1] == CHECKER_PER_PLAYER {
+            return true;
+        }
+
+        /* if already played from head, but dices are not equal */
+        if dice_pair.first() != dice_pair.second() {
+            return false;
+        }
+
+        /* if opponent checker can't be found on the path of dice moves */
+        let dice_can_be_fully_played: bool = (1..=4)
+            .filter(|i| i * dice_pair.first() < MAX_PIPS)
+            .map(|i| Pip::new(i * dice_pair.first()))
+            .find(|pip| self.opponent_has_checker_in_pip(for_side, *pip))
+            .is_none();
+
+
+        /* if already played from head and dices are equal and dices can't be fully played */
+        !dice_can_be_fully_played
     }
 }

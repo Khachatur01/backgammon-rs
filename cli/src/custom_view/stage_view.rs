@@ -10,7 +10,7 @@ use cursive::reexports::ahash::HashMapExt;
 use cursive::{Printer, Vec2, View};
 use engine::board::checkers::Checkers;
 use engine::constant::player::Side;
-use engine::constant::{PIPS_SIZE, BOTTOM_LEFT_BOARD_RIGHT_PIP, BOTTOM_RIGHT_BOARD_RIGHT_PIP, TOP_LEFT_BOARD_LEFT_PIP, TOP_LEFT_BOARD_RIGHT_PIP, TOP_RIGHT_BOARD_LEFT_PIP, TOP_RIGHT_BOARD_RIGHT_PIP, BOTTOM_LEFT_BOARD_LEFT_PIP, BOTTOM_RIGHT_BOARD_LEFT_PIP};
+use engine::constant::{MAX_PIPS, BOTTOM_LEFT_BOARD_RIGHT_PIP, BOTTOM_RIGHT_BOARD_RIGHT_PIP, TOP_LEFT_BOARD_LEFT_PIP, TOP_LEFT_BOARD_RIGHT_PIP, TOP_RIGHT_BOARD_LEFT_PIP, TOP_RIGHT_BOARD_RIGHT_PIP, BOTTOM_LEFT_BOARD_LEFT_PIP, BOTTOM_RIGHT_BOARD_LEFT_PIP};
 use engine::stage::{PossibleStage, Stage};
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
@@ -116,7 +116,7 @@ impl StageView {
 
         let pip_size: usize = self.theme.pip_size as usize;
 
-        let pips_range = (0..PIPS_SIZE)
+        let pips_range = (0..MAX_PIPS)
             /* filter all right border pips to avoid rendering separator for them */
             .filter(|pip_index|
                 ![
@@ -424,10 +424,10 @@ impl StageView {
     }
 
     fn get_opponent_pip(&self, pip: Pip) -> Pip {
-        if *pip < PIPS_SIZE / 2 {
-            Pip::new(*pip + PIPS_SIZE / 2)
+        if *pip < MAX_PIPS / 2 {
+            Pip::new(*pip + MAX_PIPS / 2)
         } else {
-            Pip::new(*pip - PIPS_SIZE / 2)
+            Pip::new(*pip - MAX_PIPS / 2)
         }
     }
 

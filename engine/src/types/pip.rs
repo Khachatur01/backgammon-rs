@@ -1,4 +1,4 @@
-use crate::constant::PIPS_SIZE;
+use crate::constant::MAX_PIPS;
 use std::ops::Deref;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -6,11 +6,11 @@ pub struct Pip(u8);
 
 impl Pip {
     pub fn new(value: u8) -> Self {
-        if value >= PIPS_SIZE {
+        if value >= MAX_PIPS {
             panic!(
                 "Can't create Pip. \
                 Invalid value: {value}. \
-                Must be in the range [0 - {PIPS_SIZE})"
+                Must be in the range [0 - {MAX_PIPS})"
             );
         }
 
