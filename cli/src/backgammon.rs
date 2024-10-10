@@ -47,6 +47,9 @@ impl Backgammon {
                 Event::Key(Key::Enter) => {
                     current_stage = self.on_enter(current_stage);
                 }
+                Event::Key(Key::Esc) => {
+                    current_stage = self.on_esc(current_stage);
+                }
                 Event::Key(key @ (Key::Left | Key::Right | Key::Down | Key::Up)) => {
                     current_stage = self.on_focus_pip(current_stage, key);
                 }
@@ -88,33 +91,20 @@ impl Backgammon {
                     }
                 }
             }
-            PossibleStage::AfterThrowingDices(after_throwing_dices) => {
-                PossibleStage::AfterThrowingDices(after_throwing_dices)
-            }
-            PossibleStage::CheckerTaken(checker_taken) => {
-                PossibleStage::CheckerTaken(checker_taken)
-            }
-            PossibleStage::CheckerMoved(checker_moved) => {
-                PossibleStage::CheckerMoved(checker_moved)
-            }
-            PossibleStage::NoPossibleMoves(no_possible_moves) => {
-                PossibleStage::NoPossibleMoves(no_possible_moves)
-            }
-            PossibleStage::OutOfMoves(out_of_moves) => {
-                PossibleStage::OutOfMoves(out_of_moves)
-            }
-            PossibleStage::MovesCommited(moves_commited) => {
-                PossibleStage::MovesCommited(moves_commited)
-            }
-            PossibleStage::SideSwitched(side_switched) => {
-                PossibleStage::SideSwitched(side_switched)
-            }
-            PossibleStage::Win(win) => {
-                PossibleStage::Win(win)
-            }
+            _ => current_stage,
         }
     }
+    fn on_esc(&self, current_stage: PossibleStage) -> PossibleStage {
+        match current_stage {
+            PossibleStage::CheckerTaken(checker_taken) => {
+                let dices_thrown_stage: DicesThrown = checker_taken.cancel();
+                self.send_view(&dices_thrown_stage);
 
+                PossibleStage::DicesThrown(dices_thrown_stage)
+            }
+            _ => current_stage,
+        }
+    }
 
     fn on_focus_pip(&self, current_stage: PossibleStage, direction: Key) -> PossibleStage {
         fn get_pip_to_focus(focused_pip: Pip, direction: Key) -> Result<Pip, String> {
@@ -163,17 +153,28 @@ impl Backgammon {
             Ok(result_pip)
         }
 
-        if let PossibleStage::DicesThrown(mut dices_thrown_stage) = current_stage {
-            if let Some(focused_pip) = dices_thrown_stage.focused_pip() {
-                if let Ok(pip_to_focus) = get_pip_to_focus(focused_pip, direction) {
-                    dices_thrown_stage.focus_pip(pip_to_focus);
+        match current_stage {
+            PossibleStage::DicesThrown(mut dices_thrown_stage) => {
+                if let Some(focused_pip) = dices_thrown_stage.focused_pip() {
+                    if let Ok(pip_to_focus) = get_pip_to_focus(focused_pip, direction) {
+                        dices_thrown_stage.focus_pip(pip_to_focus);
 
-                    self.send_view(&dices_thrown_stage);
+                        self.send_view(&dices_thrown_stage);
+                    }
                 }
+                PossibleStage::DicesThrown(dices_thrown_stage)
             }
-            return PossibleStage::DicesThrown(dices_thrown_stage);
-        }
+            PossibleStage::CheckerTaken(mut checker_taken_stage) => {
+                if let Some(focused_pip) = checker_taken_stage.focused_pip() {
+                    if let Ok(pip_to_focus) = get_pip_to_focus(focused_pip, direction) {
+                        checker_taken_stage.focus_pip(pip_to_focus);
 
-        current_stage
+                        self.send_view(&checker_taken_stage);
+                    }
+                }
+                PossibleStage::CheckerTaken(checker_taken_stage)
+            }
+            _ => current_stage
+        }
     }
 }

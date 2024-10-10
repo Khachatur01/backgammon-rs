@@ -1,6 +1,8 @@
 mod row;
 pub mod render_for;
 
+use std::f64::consts::PI;
+use std::fmt::Pointer;
 use crate::custom_view::stage_view::render_for::RenderFor;
 use crate::stage_theme::StageTheme;
 use cursive::event::Event;
@@ -9,7 +11,7 @@ use cursive::{Printer, Vec2, View};
 use engine::board::checkers::Checkers;
 use engine::constant::player::Side;
 use engine::constant::{PIPS_SIZE, BOTTOM_LEFT_BOARD_RIGHT_PIP, BOTTOM_RIGHT_BOARD_RIGHT_PIP, TOP_LEFT_BOARD_LEFT_PIP, TOP_LEFT_BOARD_RIGHT_PIP, TOP_RIGHT_BOARD_LEFT_PIP, TOP_RIGHT_BOARD_RIGHT_PIP, BOTTOM_LEFT_BOARD_LEFT_PIP, BOTTOM_RIGHT_BOARD_LEFT_PIP};
-use engine::stage::Stage;
+use engine::stage::{PossibleStage, Stage};
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
 use std::usize;
@@ -167,11 +169,22 @@ impl StageView {
                            checker_view: String,
                            printer: &Printer,
                            max_checkers_to_show: usize,
+                           show_focused_pip: bool,
                            get_position: impl Fn(&StageView, Pip, usize) -> (usize, usize)) {
 
-            for (pip, active_side_checkers_in_pip) in checkers.on_board.iter().enumerate() {
-                let active_side_checkers_in_pip: usize = *active_side_checkers_in_pip as usize;
-                let cut_off_count: usize = usize::min(active_side_checkers_in_pip, max_checkers_to_show);
+            for (pip, checkers_in_pip) in checkers.on_board.iter().enumerate() {
+                let mut checkers_in_pip: usize = *checkers_in_pip as usize;
+
+                if show_focused_pip && this.taken_checker_pip.is_some() && this.focused_pip.is_some() {
+                    if *this.focused_pip.unwrap() == pip as u8 {
+                        checkers_in_pip += 1;
+                    }
+                    if *this.taken_checker_pip.unwrap() == pip as u8 {
+                        checkers_in_pip -= 1;
+                    }
+                }
+
+                let cut_off_count: usize = usize::min(checkers_in_pip, max_checkers_to_show);
 
                 for column in 0..cut_off_count {
                     let pip: Pip = Pip::new(pip as u8);
@@ -182,13 +195,12 @@ impl StageView {
                     );
                 }
 
-                if active_side_checkers_in_pip > cut_off_count {
+                if checkers_in_pip > cut_off_count {
                     let pip: Pip = Pip::new(pip as u8);
                     let position: (usize, usize) = get_position(this, pip, cut_off_count);
-
                     printer.print(
                         position,
-                        &this.theme.numbers[active_side_checkers_in_pip - 1].to_string()
+                        &this.theme.numbers[checkers_in_pip - 1].to_string()
                     );
                 }
             }
@@ -226,6 +238,7 @@ impl StageView {
                         active_side_checker_view,
                         printer,
                         max_checkers_to_show,
+                        true,
                         |_, pip, column| {
                             self.get_position_for_active_side(pip, column)
                         }
@@ -236,6 +249,7 @@ impl StageView {
                         opponent_checker_view,
                         printer,
                         max_checkers_to_show,
+                        false,
                         |_, pip, column| {
                             self.get_position_for_opponent(pip, column)
                         }
@@ -270,8 +284,54 @@ impl StageView {
         }
     }
 
-    fn render_hints(&self, printer: &Printer) {
-        /* TODO */
+    fn render_taken_checker(&self, printer: &Printer) {
+        let taken_checker_pip: Pip = match self.taken_checker_pip {
+            Some(pip) => pip,
+            None => return,
+        };
+        let focused_pip: Pip = match self.focused_pip {
+            Some(pip) => pip,
+            None => return,
+        };
+
+        let active_side: Side = match self.active_side {
+            Some(side) => side,
+            None => return,
+        };
+
+        /* render hints only for active side */
+        if active_side != self.render_for {
+            return;
+        }
+
+        let pointer: String = match *taken_checker_pip {
+            0..BOTTOM_LEFT_BOARD_LEFT_PIP => {
+                self.theme.down
+            }
+            _ => self.theme.up
+        }.to_string();
+
+        let active_side_checkers: Checkers = match active_side {
+            Side::White => self.white_checkers,
+            Side::Black => self.black_checkers,
+        };
+
+        let mut checkers_count: usize = active_side_checkers.on_board[*taken_checker_pip as usize] as usize;
+        checkers_count = usize::min(checkers_count, self.theme.get_max_checkers_to_show());
+
+        checkers_count +=
+            if *taken_checker_pip == *focused_pip { 2 } else { 1 };
+
+        let position: (usize, usize) = self.get_position_for_active_side(taken_checker_pip, checkers_count);
+
+        printer.print(
+            position,
+            &pointer
+        );
+    }
+
+    fn render_hints(&self, pointer: &Printer) {
+
     }
 
     fn render_focused_pip(&self, printer: &Printer) {
@@ -387,6 +447,7 @@ impl View for StageView {
         self.render_board_checkers(printer);
         self.render_bore_off_checkers(printer);
         self.render_dices(printer);
+        self.render_taken_checker(printer);
         self.render_hints(printer);
         self.render_focused_pip(printer);
 
