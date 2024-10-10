@@ -9,7 +9,8 @@ use engine::{stage, start_game};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
-use engine::constant::error::TakeError;
+use engine::constant::error::{MoveError, TakeError};
+use engine::stage::checker_moved::CheckerMoved;
 use engine::stage::dices_thrown::DicesThrown;
 
 pub struct Backgammon {
@@ -87,6 +88,32 @@ impl Backgammon {
                             TakeError::NotEnoughCheckers(dices_thrown_stage) |
                             TakeError::TakingOpponentPip(dices_thrown_stage) =>
                                 PossibleStage::DicesThrown(dices_thrown_stage)
+                        }
+                    }
+                }
+            }
+            PossibleStage::CheckerTaken(checker_taken_stage) => {
+                match checker_taken_stage.play_checker() {
+                    Ok(checker_moved_stage) => {
+                        match checker_moved_stage {
+                            CheckerMoved::DicesThrown(dices_thrown_stage) => {
+                                self.send_view(&dices_thrown_stage);
+
+                                PossibleStage::DicesThrown(dices_thrown_stage)
+                            }
+                            CheckerMoved::OutOfMoves(out_of_moves_stage) => {
+                                self.send_view(&out_of_moves_stage);
+
+                                PossibleStage::OutOfMoves(out_of_moves_stage)
+                            }
+                        }
+                    }
+                    Err(move_error) => {
+                        match move_error {
+                            MoveError::BlockingOpponent(checker_taken_stage) |
+                            MoveError::PipIsOccupiedByOpponent(checker_taken_stage) |
+                            MoveError::InconsistentWithDices(checker_taken_stage) =>
+                                PossibleStage::CheckerTaken(checker_taken_stage)
                         }
                     }
                 }
