@@ -24,6 +24,7 @@ impl Stage for SideSwitched {
     fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { None }
     fn focused_pip(&self) -> Option<Pip> { None }
+    fn possible_moves(&self) -> Option<Vec<CheckerMove>> { None }
 }
 
 impl SideSwitched {

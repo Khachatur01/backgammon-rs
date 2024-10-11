@@ -75,7 +75,7 @@ impl Board {
                 continue;
             }
 
-            let mut moves_from_index: Vec<CheckerMove> = self.get_possible_moves_from(
+            let mut moves_from_index: Vec<CheckerMove> = self.get_possible_moves_from_pip(
                 for_side,
                 dice_pair,
                 done_moves,
@@ -88,19 +88,43 @@ impl Board {
         moves
     }
 
-    pub fn get_possible_moves_from(&self,
-                                   for_side: Side,
-                                   dice_pair: DicePair,
-                                   done_moves: &[CheckerMove],
-                                   from: Pip) -> Vec<CheckerMove> {
+    pub fn get_possible_moves_from_pip(&self,
+                                       for_side: Side,
+                                       dice_pair: DicePair,
+                                       done_moves: &[CheckerMove],
+                                       from_pip: Pip) -> Vec<CheckerMove> {
 
-        /* playing from the head */
-        if *from == MAX_PIPS - 1 && !self.can_play_from_head(for_side, dice_pair) {
+        let is_playing_from_head: bool = *from_pip == MAX_PIPS - 1;
+        let can_play_from_head: bool = self.can_play_from_head(for_side, dice_pair);
+
+        if is_playing_from_head && !can_play_from_head {
             return vec![];
         }
 
+        let potential_steps: Vec<u8> = if dice_pair.first() == dice_pair.second() {
+            (1..=4)
+                .map(|dice_index| dice_index * dice_pair.first())
+                .collect()
+        } else {
+            vec![
+                dice_pair.first(),
+                dice_pair.second(),
+                dice_pair.first() + dice_pair.second()
+            ]
+        };
+
+        let potential_target_pips: Vec<Pip> = potential_steps
+            .into_iter()
+            .map(|step| *from_pip - step)
+            .filter(|pip_index| *pip_index < MAX_PIPS)
+            .map(|pip_index| Pip::new(pip_index))
+            .collect();
+
         /* TODO */
-        vec![]
+        potential_target_pips
+            .iter()
+            .map(|to_pip: &Pip| Play(from_pip, *to_pip))
+            .collect()
     }
 
     pub fn move_checker(&mut self, for_side: Side, checker_move: CheckerMove) {
@@ -266,7 +290,7 @@ impl Board {
         };
 
         /* if not played from head yet */
-        if active_side_checkers[MAX_PIPS - 1] == CHECKER_PER_PLAYER {
+        if active_side_checkers.on_board[MAX_PIPS as usize - 1] == CHECKER_PER_PLAYER {
             return true;
         }
 
@@ -275,7 +299,7 @@ impl Board {
             return false;
         }
 
-        /* if opponent checker can be found on the path of dice moves */
+        /* if opponent checker can be found on the road of dice moves */
         let dice_can_not_be_fully_played: bool = (1..=4)
             .filter(|i| i * dice_pair.first() < MAX_PIPS)
             .map(|i| Pip::new(i * dice_pair.first()))

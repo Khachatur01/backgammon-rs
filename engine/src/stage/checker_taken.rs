@@ -28,6 +28,7 @@ impl Stage for CheckerTaken {
     fn dice_pair(&self) -> Option<DicePair> { Some(self.dice_pair) }
     fn taken_checker_pip(&self) -> Option<Pip> { Some(self.from_pip) }
     fn focused_pip(&self) -> Option<Pip> { Some(self.focused_pip) }
+    fn possible_moves(&self) -> Option<Vec<CheckerMove>> { None }
 }
 
 impl CheckerTaken {
@@ -102,7 +103,7 @@ impl CheckerTaken {
             CheckerMove::BearOff(from_pip) => from_pip,
         };
 
-        let mut possible_moves: Vec<CheckerMove> = self.board.get_possible_moves_from(
+        let mut possible_moves: Vec<CheckerMove> = self.board.get_possible_moves_from_pip(
             self.active_side,
             self.dice_pair,
             self.done_moves.as_slice(),

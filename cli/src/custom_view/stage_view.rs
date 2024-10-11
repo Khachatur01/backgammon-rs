@@ -15,6 +15,7 @@ use engine::stage::{PossibleStage, Stage};
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
 use std::usize;
+use engine::types::checker_move::CheckerMove;
 
 type EventHandler = Box<dyn Fn(Event) -> () + Send + Sync + 'static>;
 
@@ -25,6 +26,7 @@ pub struct StageView {
     dice_pair: Option<DicePair>,
     taken_checker_pip: Option<Pip>,
     focused_pip: Option<Pip>,
+    possible_moves: Option<Vec<CheckerMove>>,
 
     render_for: Side,
     theme: StageTheme,
@@ -45,6 +47,7 @@ impl StageView {
             dice_pair: stage.dice_pair(),
             taken_checker_pip: stage.taken_checker_pip(),
             focused_pip: stage.focused_pip(),
+            possible_moves: stage.possible_moves(),
 
             render_for,
             theme
@@ -168,9 +171,10 @@ impl StageView {
                            checkers: Checkers,
                            checker_view: String,
                            printer: &Printer,
-                           max_checkers_to_show: usize,
                            show_focused_pip: bool,
                            get_position: impl Fn(&StageView, Pip, usize) -> (usize, usize)) {
+
+            let max_checkers_to_show: usize = this.theme.get_max_checkers_to_show();
 
             for (pip, checkers_in_pip) in checkers.on_board.iter().enumerate() {
                 let mut checkers_in_pip: usize = *checkers_in_pip as usize;
@@ -212,8 +216,6 @@ impl StageView {
         let black_checker: char = self.theme.black_checker;
         let black_checker: String = black_checker.to_string();
 
-        let max_checkers_to_show: usize = self.theme.get_max_checkers_to_show();
-
         let (active_side_checkers,
             active_side_checker_view,
             opponent_side_checkers,
@@ -237,7 +239,6 @@ impl StageView {
                         active_side_checkers,
                         active_side_checker_view,
                         printer,
-                        max_checkers_to_show,
                         true,
                         |_, pip, column| {
                             self.get_position_for_active_side(pip, column)
@@ -248,7 +249,6 @@ impl StageView {
                         opponent_side_checkers,
                         opponent_checker_view,
                         printer,
-                        max_checkers_to_show,
                         false,
                         |_, pip, column| {
                             self.get_position_for_opponent(pip, column)
@@ -330,8 +330,62 @@ impl StageView {
         );
     }
 
-    fn render_hints(&self, pointer: &Printer) {
+    fn render_possible_moves(&self, printer: &Printer) {
+        let active_side_checkers: &Checkers = match self.active_side {
+            Some(active_side) => {
+                match active_side {
+                    Side::White => &self.white_checkers,
+                    Side::Black => &self.black_checkers
+                }
+            }
+            None => return
+        };
 
+        let possible_move: char = self.theme.possible_move;
+        let possible_move: String = possible_move.to_string();
+
+        let max_checkers_to_show: usize = self.theme.get_max_checkers_to_show();
+
+        let possible_moves: &Vec<CheckerMove> =
+            if let Some(possible_moves) = &self.possible_moves {
+                possible_moves
+            } else {
+                return;
+            };
+
+        let possible_moves: Vec<CheckerMove> = possible_moves
+            .iter()
+            .map(|checker_move: &CheckerMove| *checker_move)
+            .filter(|checker_move: &CheckerMove|
+                match *checker_move {
+                    CheckerMove::Play(from_pip, _) |
+                    CheckerMove::BearOff(from_pip) => {
+                        if let Some(taken_checker_pip) = self.taken_checker_pip {
+                            *from_pip == *taken_checker_pip
+                        } else {
+                            true
+                        }
+                    }
+                }
+            )
+            .collect();
+
+        possible_moves.iter().for_each(|checker_move: &CheckerMove| {
+            match checker_move {
+                CheckerMove::Play(_, to_pip) => {
+                    let checkers_in_pip: usize = active_side_checkers.on_board[**to_pip as usize] as usize;
+                    let column: usize = usize::min(max_checkers_to_show, checkers_in_pip);
+
+                    let position: (usize, usize) = self.get_position_for_active_side(*to_pip, column);
+
+                    printer.print(
+                        position,
+                        &possible_move
+                    );
+                }
+                CheckerMove::BearOff(_) => {}
+            }
+        });
     }
 
     fn render_focused_pip(&self, printer: &Printer) {
@@ -448,7 +502,7 @@ impl View for StageView {
         self.render_bore_off_checkers(printer);
         self.render_dices(printer);
         self.render_taken_checker(printer);
-        self.render_hints(printer);
+        self.render_possible_moves(printer);
         self.render_focused_pip(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {

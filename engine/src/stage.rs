@@ -10,6 +10,7 @@ use crate::stage::out_of_moves::OutOfMoves;
 use crate::stage::side_switched::SideSwitched;
 use crate::stage::started::Started;
 use crate::stage::win::Win;
+use crate::types::checker_move::CheckerMove;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
 
@@ -31,6 +32,7 @@ pub trait Stage {
     fn dice_pair(&self) -> Option<DicePair>;
     fn taken_checker_pip(&self) -> Option<Pip>;
     fn focused_pip(&self) -> Option<Pip>;
+    fn possible_moves(&self) -> Option<Vec<CheckerMove>>;
 }
 
 pub enum PossibleStage {
