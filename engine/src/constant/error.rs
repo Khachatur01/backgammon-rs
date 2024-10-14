@@ -8,7 +8,6 @@ pub enum TakeError<SELF> {
 
 #[derive(Debug)]
 pub enum MoveError<SELF> {
-    BlockingOpponent(SELF),
     PipIsOccupiedByOpponent(SELF),
     InconsistentWithDices(SELF)
 }
@@ -21,6 +20,7 @@ pub enum BearOffError<SELF> {
 
 #[derive(Debug)]
 pub enum CommitError<SELF> {
+    OpponentBlocked(SELF),
     NotAllDicesPlayed(SELF)
 }
 

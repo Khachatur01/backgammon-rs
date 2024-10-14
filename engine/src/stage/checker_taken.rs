@@ -71,12 +71,8 @@ impl CheckerTaken {
             return Err(MoveError::PipIsOccupiedByOpponent(self));
         }
 
-        if self.is_blocking_opponent(play) {
-            return Err(MoveError::BlockingOpponent(self));
-        }
-
         if self.check_move_possibility(play).is_err() {
-            return Err(MoveError::InconsistentWithDices(self))
+            return Err(MoveError::InconsistentWithDices(self));
         };
 
         let next_stage: CheckerMoved = self.move_checker(play);
@@ -130,14 +126,6 @@ impl CheckerTaken {
         }
 
         Ok(())
-    }
-
-    fn is_blocking_opponent(&self, checker_move: CheckerMove) -> bool {
-        match checker_move {
-            CheckerMove::Play(from_pip, to_pip) =>
-                self.board.is_blocking_opponent(self.active_side, from_pip, to_pip),
-            CheckerMove::BearOff(_) => false,
-        }
     }
 
     fn move_checker(mut self, checker_move: CheckerMove) -> CheckerMoved {

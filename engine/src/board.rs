@@ -121,7 +121,9 @@ impl Board {
             .map(|pip_index| Pip::new(pip_index))
             .collect();
 
+        /* remove already done moves */
         /* TODO */
+
         potential_target_pips
             .iter()
             .map(|to_pip: &Pip| Play(from_pip, *to_pip))
@@ -177,6 +179,40 @@ impl Board {
         });
 
         !has_checker_outside_home
+    }
+
+    pub fn are_all_dices_played(&self, for_side: Side, dice_pair: DicePair, done_moves: &[CheckerMove]) -> bool {
+        /* TODO */
+        true
+    }
+
+    /* TODO: check if works */
+    pub fn is_opponent_blocked(&self, for_side: Side) -> bool {
+        let active_side_checkers = match for_side {
+            Side::White => &self.white_checkers,
+            Side::Black => &self.black_checkers
+        };
+
+        let mut continues_peaces_count: u8 = 0;
+        for (pip_index, checkers_count) in active_side_checkers.on_board.iter().enumerate() {
+            if *checkers_count == 0 {
+                if continues_peaces_count >= MAX_PIPS / 4 {
+                    let pip: Pip = Pip::new(pip_index as u8 - 1);
+                    let opponent_pip: Pip = self.to_opponent_pip(pip);
+                    let opponent_has_checker_after_pip: bool = self.has_checker_after_pip(for_side, opponent_pip);
+
+                    if !opponent_has_checker_after_pip {
+                        return true;
+                    }
+                }
+
+                continues_peaces_count = 0;
+            } else {
+                continues_peaces_count += 1;
+            }
+        }
+
+        false
     }
 
     pub fn is_blocking_opponent(&self, for_side: Side, from_pip: Pip, to_pip: Pip) -> bool {
@@ -278,8 +314,10 @@ impl Board {
             Side::Black => &self.black_checkers
         };
 
+        let pip: usize = *pip as usize;
+
         active_side_checkers
-            .on_board[*pip as usize..MAX_PIPS as usize]
+            .on_board[pip + 1..MAX_PIPS as usize]
             .iter()
             .any(|checkers: &u8| *checkers > 0)
     }

@@ -110,7 +110,6 @@ impl Backgammon {
                     }
                     Err(move_error) => {
                         match move_error {
-                            MoveError::BlockingOpponent(checker_taken_stage) |
                             MoveError::PipIsOccupiedByOpponent(checker_taken_stage) |
                             MoveError::InconsistentWithDices(checker_taken_stage) =>
                                 PossibleStage::CheckerTaken(checker_taken_stage)

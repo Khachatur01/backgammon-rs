@@ -43,6 +43,14 @@ impl OutOfMoves {
     }
 
     pub fn commit_moves(self) -> Result<MovesCommited, CommitError<Self>> {
+        if self.board.is_opponent_blocked(self.active_side) {
+            return Err(CommitError::OpponentBlocked(self));
+        }
+
+        if !self.board.are_all_dices_played(self.active_side, self.dice_pair, &self.done_moves) {
+            return Err(CommitError::NotAllDicesPlayed(self));
+        }
+
         let next_stage: MovesCommited = if self.board.has_checkers(self.active_side) {
             /* Switch active side */
             let new_active_side: Side = match self.active_side {
