@@ -115,8 +115,9 @@ impl Board {
 
         let potential_target_pips: Vec<Pip> = potential_steps
             .into_iter()
-            .map(|step| *from_pip - step)
-            .filter(|pip_index| *pip_index < MAX_PIPS)
+            .map(|step| (*from_pip).checked_sub(step))
+            .filter(|pip_index| (*pip_index).is_some())
+            .map(|pip_index| pip_index.unwrap())
             .map(|pip_index| Pip::new(pip_index))
             .collect();
 

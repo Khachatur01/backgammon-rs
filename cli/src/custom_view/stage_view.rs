@@ -1,23 +1,21 @@
 mod row;
 pub mod render_for;
 
-use std::f64::consts::PI;
-use std::fmt::Pointer;
 use crate::custom_view::stage_view::render_for::RenderFor;
 use crate::stage_theme::StageTheme;
-use cursive::event::Event;
 use cursive::reexports::ahash::HashMapExt;
 use cursive::{Printer, Vec2, View};
 use engine::board::checkers::Checkers;
 use engine::constant::player::Side;
-use engine::constant::{MAX_PIPS, BOTTOM_LEFT_BOARD_RIGHT_PIP, BOTTOM_RIGHT_BOARD_RIGHT_PIP, TOP_LEFT_BOARD_LEFT_PIP, TOP_LEFT_BOARD_RIGHT_PIP, TOP_RIGHT_BOARD_LEFT_PIP, TOP_RIGHT_BOARD_RIGHT_PIP, BOTTOM_LEFT_BOARD_LEFT_PIP, BOTTOM_RIGHT_BOARD_LEFT_PIP};
-use engine::stage::{PossibleStage, Stage};
+use engine::constant::{BOTTOM_LEFT_BOARD_LEFT_PIP, BOTTOM_LEFT_BOARD_RIGHT_PIP, BOTTOM_RIGHT_BOARD_LEFT_PIP, BOTTOM_RIGHT_BOARD_RIGHT_PIP, MAX_PIPS, TOP_LEFT_BOARD_LEFT_PIP, TOP_LEFT_BOARD_RIGHT_PIP, TOP_RIGHT_BOARD_LEFT_PIP, TOP_RIGHT_BOARD_RIGHT_PIP};
+use engine::stage::Stage;
+use engine::types::checker_move::CheckerMove;
 use engine::types::dice_pair::DicePair;
 use engine::types::pip::Pip;
+use std::fmt::Pointer;
 use std::usize;
-use engine::types::checker_move::CheckerMove;
 
-type EventHandler = Box<dyn Fn(Event) -> () + Send + Sync + 'static>;
+type PipColumn = Vec<char>;
 
 pub struct StageView {
     white_checkers: Checkers,
@@ -50,7 +48,7 @@ impl StageView {
             possible_moves: stage.possible_moves(),
 
             render_for,
-            theme
+            theme,
         }
     }
 
@@ -256,34 +254,6 @@ impl StageView {
         );
     }
 
-    fn render_bore_off_checkers(&self, printer: &Printer) {
-        /* TODO */
-    }
-
-    fn render_dices(&self, printer: &Printer) {
-        if let Some(dice_pair) = self.dice_pair {
-            let first_dice_view: char = self.theme.dices[(dice_pair.first() - 1) as usize];
-            let first_dice_number: char = self.theme.numbers[(dice_pair.first() - 1) as usize];
-
-            let second_dice_view: char = self.theme.dices[(dice_pair.second() - 1) as usize];
-            let second_dice_number: char = self.theme.numbers[(dice_pair.second() - 1) as usize];
-
-            let y_position: usize = (*self.theme.height) / 2 + 1;
-
-            let left_board_middle_position: usize = self.get_left_board_physical_left() + self.theme.get_half_width() / 2;
-            let right_board_middle_position: usize = self.get_right_board_physical_left() + self.theme.get_half_width() / 2;
-
-            printer.print(
-                (left_board_middle_position, y_position),
-                &format!("{} {}", &first_dice_view, &first_dice_number)
-            );
-            printer.print(
-                (right_board_middle_position, y_position),
-                &format!("{} {}", &second_dice_view, &second_dice_number)
-            );
-        }
-    }
-
     fn render_taken_checker(&self, printer: &Printer) {
         let taken_checker_pip: Pip = match self.taken_checker_pip {
             Some(pip) => pip,
@@ -293,7 +263,6 @@ impl StageView {
             Some(pip) => pip,
             None => return,
         };
-
         let active_side: Side = match self.active_side {
             Some(side) => side,
             None => return,
@@ -306,9 +275,9 @@ impl StageView {
 
         let pointer: String = match *taken_checker_pip {
             0..BOTTOM_LEFT_BOARD_LEFT_PIP => {
-                self.theme.down
+                self.theme.up
             }
-            _ => self.theme.up
+            _ => self.theme.down
         }.to_string();
 
         let active_side_checkers: Checkers = match active_side {
@@ -343,6 +312,10 @@ impl StageView {
 
         let possible_move: char = self.theme.possible_move;
         let possible_move: String = possible_move.to_string();
+        let up: char = self.theme.up;
+        let up: String = up.to_string();
+        let down: char = self.theme.down;
+        let down: String = down.to_string();
 
         let max_checkers_to_show: usize = self.theme.get_max_checkers_to_show();
 
@@ -352,23 +325,6 @@ impl StageView {
             } else {
                 return;
             };
-
-        let possible_moves: Vec<CheckerMove> = possible_moves
-            .iter()
-            .map(|checker_move: &CheckerMove| *checker_move)
-            .filter(|checker_move: &CheckerMove|
-                match *checker_move {
-                    CheckerMove::Play(from_pip, _) |
-                    CheckerMove::BearOff(from_pip) => {
-                        if let Some(taken_checker_pip) = self.taken_checker_pip {
-                            *from_pip == *taken_checker_pip
-                        } else {
-                            true
-                        }
-                    }
-                }
-            )
-            .collect();
 
         possible_moves.iter().for_each(|checker_move: &CheckerMove| {
             match checker_move {
@@ -383,7 +339,7 @@ impl StageView {
                         &possible_move
                     );
                 }
-                CheckerMove::BearOff(_) => {}
+                CheckerMove::BearOff(_) => { /* @TODO */ }
             }
         });
     }
@@ -431,6 +387,34 @@ impl StageView {
             printer.print(
                 position,
                 focused_pip.as_str()
+            );
+        }
+    }
+
+    fn render_bore_off_checkers(&self, printer: &Printer) {
+        /* TODO */
+    }
+
+    fn render_dices(&self, printer: &Printer) {
+        if let Some(dice_pair) = self.dice_pair {
+            let first_dice_view: char = self.theme.dices[(dice_pair.first() - 1) as usize];
+            let first_dice_number: char = self.theme.numbers[(dice_pair.first() - 1) as usize];
+
+            let second_dice_view: char = self.theme.dices[(dice_pair.second() - 1) as usize];
+            let second_dice_number: char = self.theme.numbers[(dice_pair.second() - 1) as usize];
+
+            let y_position: usize = (*self.theme.height) / 2 + 1;
+
+            let left_board_middle_position: usize = self.get_left_board_physical_left() + self.theme.get_half_width() / 2;
+            let right_board_middle_position: usize = self.get_right_board_physical_left() + self.theme.get_half_width() / 2;
+
+            printer.print(
+                (left_board_middle_position, y_position),
+                &format!("{} {}", &first_dice_view, &first_dice_number)
+            );
+            printer.print(
+                (right_board_middle_position, y_position),
+                &format!("{} {}", &second_dice_view, &second_dice_number)
             );
         }
     }
@@ -494,16 +478,24 @@ impl StageView {
     }
 }
 
+impl StageView {
+
+}
+
 impl View for StageView {
     fn draw(&self, printer: &Printer) {
+        let mut pips_columns: [PipColumn; MAX_PIPS as usize] = std::array::from_fn(|_| Vec::new());
+
         self.render_borders(printer);
         self.render_separators(printer);
+
         self.render_board_checkers(printer);
-        self.render_bore_off_checkers(printer);
-        self.render_dices(printer);
         self.render_taken_checker(printer);
         self.render_possible_moves(printer);
         self.render_focused_pip(printer);
+
+        self.render_bore_off_checkers(printer);
+        self.render_dices(printer);
 
         // printer.with_color(ColorStyle::title_primary(), |printer| {
         //     printer.print(
