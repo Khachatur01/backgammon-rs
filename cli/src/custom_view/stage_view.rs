@@ -279,15 +279,14 @@ impl StageView {
                         checkers: Checkers,
                         checker_view: char,
                         pips_columns: &mut PipsStack,
-                        show_focused_pip: bool,
-                        get_pip_index: impl Fn(usize) -> usize) {
+                        is_active_side: bool,) {
 
             let max_checkers_to_show: usize = this.theme.get_max_checkers_to_show();
 
             for (pip_index, checkers_in_pip) in checkers.on_board.iter().enumerate() {
                 let mut checkers_in_pip: usize = *checkers_in_pip as usize;
 
-                if show_focused_pip && this.taken_checker_pip.is_some() && this.focused_pip.is_some() {
+                if is_active_side && this.taken_checker_pip.is_some() && this.focused_pip.is_some() {
                     if *this.focused_pip.unwrap() == pip_index as u8 {
                         checkers_in_pip += 1;
                     }
@@ -298,7 +297,11 @@ impl StageView {
 
                 let checkers_cut_off_count: usize = usize::min(checkers_in_pip, max_checkers_to_show);
 
-                let pip_index: usize = get_pip_index(pip_index);
+                let pip_index: usize = if is_active_side {
+                    pip_index
+                } else {
+                    *this.get_opponent_pip(Pip::new(pip_index as u8)) as usize
+                };
 
                 (0..checkers_cut_off_count).for_each(|_| {
                     pips_columns[pip_index].push(checker_view);
@@ -335,18 +338,14 @@ impl StageView {
                      active_side_checkers,
                      active_side_checker_view,
                      pips_stack,
-                     true,
-                     |pip| pip
+                     true
         );
 
         add_checkers(self,
                      opponent_side_checkers,
                      opponent_checker_view,
                      pips_stack,
-                     false,
-                     |pip| {
-                            *self.get_opponent_pip(Pip::new(pip as u8)) as usize
-                        }
+                     false
         );
     }
 
@@ -394,11 +393,12 @@ impl StageView {
     }
 
     fn add_focused_pip_hint(&self, pips_stack: &mut PipsStack) {
-        let focused_pip_index: usize = if let Some(focused_pip) = self.focused_pip {
-            *focused_pip as usize
-        } else {
-            return;
-        };
+        let focused_pip_index: usize =
+            if let Some(focused_pip) = self.focused_pip {
+                *focused_pip as usize
+            } else {
+                return;
+            };
 
         pips_stack[focused_pip_index].push(self.theme.focused_pip);
     }
