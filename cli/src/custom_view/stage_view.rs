@@ -164,231 +164,25 @@ impl StageView {
         }
     }
 
-    fn render_board_checkers(&self, printer: &Printer) {
-        fn render_checkers(this: &StageView,
-                           checkers: Checkers,
-                           checker_view: String,
-                           printer: &Printer,
-                           show_focused_pip: bool,
-                           get_position: impl Fn(&StageView, Pip, usize) -> (usize, usize)) {
+    fn render_pips_columns(&self, printer: &Printer, pips_columns: [PipColumn; MAX_PIPS as usize]) {
+        pips_columns
+            .iter()
+            .enumerate()
+            .for_each(|(pip_index, pip_column)| {
+                pip_column
+                    .iter()
+                    .enumerate()
+                    .for_each(|(column_index, char)| {
+                        let position = self.get_position_for_active_side(Pip::new(pip_index as u8), column_index);
 
-            let max_checkers_to_show: usize = this.theme.get_max_checkers_to_show();
+                            let char: String = char.to_string();
 
-            for (pip, checkers_in_pip) in checkers.on_board.iter().enumerate() {
-                let mut checkers_in_pip: usize = *checkers_in_pip as usize;
-
-                if show_focused_pip && this.taken_checker_pip.is_some() && this.focused_pip.is_some() {
-                    if *this.focused_pip.unwrap() == pip as u8 {
-                        checkers_in_pip += 1;
-                    }
-                    if *this.taken_checker_pip.unwrap() == pip as u8 {
-                        checkers_in_pip -= 1;
-                    }
-                }
-
-                let cut_off_count: usize = usize::min(checkers_in_pip, max_checkers_to_show);
-
-                for column in 0..cut_off_count {
-                    let pip: Pip = Pip::new(pip as u8);
-                    let position: (usize, usize) = get_position(this, pip, column);
-                    printer.print(
-                        position,
-                        &checker_view
-                    );
-                }
-
-                if checkers_in_pip > cut_off_count {
-                    let pip: Pip = Pip::new(pip as u8);
-                    let position: (usize, usize) = get_position(this, pip, cut_off_count);
-                    printer.print(
-                        position,
-                        &this.theme.numbers[checkers_in_pip - 1].to_string()
-                    );
-                }
-            }
-        }
-
-        let white_checker: char = self.theme.white_checker;
-        let white_checker: String = white_checker.to_string();
-
-        let black_checker: char = self.theme.black_checker;
-        let black_checker: String = black_checker.to_string();
-
-        let (active_side_checkers,
-            active_side_checker_view,
-            opponent_side_checkers,
-            opponent_checker_view
-        ) = match self.render_for {
-            Side::White => (
-                self.white_checkers,
-                white_checker,
-                self.black_checkers,
-                black_checker,
-            ),
-            Side::Black => (
-                self.black_checkers,
-                black_checker,
-                self.white_checkers,
-                white_checker,
-            ),
-        };
-
-        render_checkers(self,
-                        active_side_checkers,
-                        active_side_checker_view,
-                        printer,
-                        true,
-                        |_, pip, column| {
-                            self.get_position_for_active_side(pip, column)
-                        }
-        );
-
-        render_checkers(self,
-                        opponent_side_checkers,
-                        opponent_checker_view,
-                        printer,
-                        false,
-                        |_, pip, column| {
-                            self.get_position_for_opponent(pip, column)
-                        }
-        );
-    }
-
-    fn render_taken_checker(&self, printer: &Printer) {
-        let taken_checker_pip: Pip = match self.taken_checker_pip {
-            Some(pip) => pip,
-            None => return,
-        };
-        let focused_pip: Pip = match self.focused_pip {
-            Some(pip) => pip,
-            None => return,
-        };
-        let active_side: Side = match self.active_side {
-            Some(side) => side,
-            None => return,
-        };
-
-        /* render hints only for active side */
-        if active_side != self.render_for {
-            return;
-        }
-
-        let pointer: String = match *taken_checker_pip {
-            0..BOTTOM_LEFT_BOARD_LEFT_PIP => {
-                self.theme.up
-            }
-            _ => self.theme.down
-        }.to_string();
-
-        let active_side_checkers: Checkers = match active_side {
-            Side::White => self.white_checkers,
-            Side::Black => self.black_checkers,
-        };
-
-        let mut checkers_count: usize = active_side_checkers.on_board[*taken_checker_pip as usize] as usize;
-        checkers_count = usize::min(checkers_count, self.theme.get_max_checkers_to_show());
-
-        checkers_count +=
-            if *taken_checker_pip == *focused_pip { 2 } else { 1 };
-
-        let position: (usize, usize) = self.get_position_for_active_side(taken_checker_pip, checkers_count);
-
-        printer.print(
-            position,
-            &pointer
-        );
-    }
-
-    fn render_possible_moves(&self, printer: &Printer) {
-        let active_side_checkers: &Checkers = match self.active_side {
-            Some(active_side) => {
-                match active_side {
-                    Side::White => &self.white_checkers,
-                    Side::Black => &self.black_checkers
-                }
-            }
-            None => return
-        };
-
-        let possible_move: char = self.theme.possible_move;
-        let possible_move: String = possible_move.to_string();
-        let up: char = self.theme.up;
-        let up: String = up.to_string();
-        let down: char = self.theme.down;
-        let down: String = down.to_string();
-
-        let max_checkers_to_show: usize = self.theme.get_max_checkers_to_show();
-
-        let possible_moves: &Vec<CheckerMove> =
-            if let Some(possible_moves) = &self.possible_moves {
-                possible_moves
-            } else {
-                return;
-            };
-
-        possible_moves.iter().for_each(|checker_move: &CheckerMove| {
-            match checker_move {
-                CheckerMove::Play(_, to_pip) => {
-                    let checkers_in_pip: usize = active_side_checkers.on_board[**to_pip as usize] as usize;
-                    let column: usize = usize::min(max_checkers_to_show, checkers_in_pip);
-
-                    let position: (usize, usize) = self.get_position_for_active_side(*to_pip, column);
-
-                    printer.print(
-                        position,
-                        &possible_move
-                    );
-                }
-                CheckerMove::BearOff(_) => { /* @TODO */ }
-            }
-        });
-    }
-
-    fn render_focused_pip(&self, printer: &Printer) {
-        if let Some(focused_pip) = self.focused_pip {
-            let (active_side_checkers, opponent_side_checkers) = match self.render_for {
-                Side::White => (
-                    self.white_checkers,
-                    self.black_checkers,
-                ),
-                Side::Black => (
-                    self.black_checkers,
-                    self.white_checkers,
-                ),
-            };
-
-            let active_side_checkers_count: usize = active_side_checkers.on_board[*focused_pip as usize] as usize;
-
-            let focused_pip_for_opponent: Pip = self.get_opponent_pip(focused_pip);
-            let opponent_side_checkers_count: usize = opponent_side_checkers.on_board[*focused_pip_for_opponent as usize] as usize;
-
-            let max_checkers_to_show: usize = self.theme.get_max_checkers_to_show();
-
-            let position: (usize, usize) =
-                if active_side_checkers_count > opponent_side_checkers_count {
-                    let cut_off_count: usize = usize::min(active_side_checkers_count, max_checkers_to_show);
-
-                    self.get_position_for_active_side(
-                        focused_pip,
-                        cut_off_count + 1
-                    )
-                } else {
-                    let cut_off_count: usize = usize::min(opponent_side_checkers_count, max_checkers_to_show);
-
-                    self.get_position_for_opponent(
-                        focused_pip_for_opponent,
-                        cut_off_count + 1
-                    )
-                };
-
-            let focused_pip: char = self.theme.focused_pip;
-            let focused_pip: String = focused_pip.to_string();
-
-            printer.print(
-                position,
-                focused_pip.as_str()
-            );
-        }
+                        printer.print(
+                            position,
+                            &char
+                        )
+                    });
+            });
     }
 
     fn render_bore_off_checkers(&self, printer: &Printer) {
@@ -479,34 +273,146 @@ impl StageView {
 }
 
 impl StageView {
+    fn add_board_checkers(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+        fn add_checkers(this: &StageView,
+                        checkers: Checkers,
+                        checker_view: char,
+                        pips_columns: &mut [PipColumn; MAX_PIPS as usize],
+                        show_focused_pip: bool,
+                        get_pip_index: impl Fn(usize) -> usize) {
 
+            let max_checkers_to_show: usize = this.theme.get_max_checkers_to_show();
+
+            for (pip_index, checkers_in_pip) in checkers.on_board.iter().enumerate() {
+                let mut checkers_in_pip: usize = *checkers_in_pip as usize;
+
+                if show_focused_pip && this.taken_checker_pip.is_some() && this.focused_pip.is_some() {
+                    if *this.focused_pip.unwrap() == pip_index as u8 {
+                        checkers_in_pip += 1;
+                    }
+                    if *this.taken_checker_pip.unwrap() == pip_index as u8 {
+                        checkers_in_pip -= 1;
+                    }
+                }
+
+                let checkers_cut_off_count: usize = usize::min(checkers_in_pip, max_checkers_to_show);
+
+                let pip_index: usize = get_pip_index(pip_index);
+
+                (0..checkers_cut_off_count).for_each(|_| {
+                    pips_columns[pip_index].push(checker_view);
+                });
+
+                if checkers_in_pip > checkers_cut_off_count {
+                    let checkers_count_hint: char = this.theme.numbers[checkers_in_pip - 1];
+
+                    pips_columns[pip_index].push(checkers_count_hint);
+                }
+            }
+        }
+
+        let (active_side_checkers,
+            active_side_checker_view,
+            opponent_side_checkers,
+            opponent_checker_view
+        ) = match self.render_for {
+            Side::White => (
+                self.white_checkers,
+                self.theme.white_checker,
+                self.black_checkers,
+                self.theme.black_checker,
+            ),
+            Side::Black => (
+                self.black_checkers,
+                self.theme.black_checker,
+                self.white_checkers,
+                self.theme.white_checker,
+            ),
+        };
+
+        add_checkers(self,
+                     active_side_checkers,
+                     active_side_checker_view,
+                     pips_columns,
+                     true,
+                     |pip| pip
+        );
+
+        add_checkers(self,
+                     opponent_side_checkers,
+                     opponent_checker_view,
+                     pips_columns,
+                     false,
+                     |pip| {
+                            *self.get_opponent_pip(Pip::new(pip as u8)) as usize
+                        }
+        );
+    }
+
+    fn add_taken_checker_hint(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+        let taken_checker_pip: Pip = match self.taken_checker_pip {
+            Some(pip) => pip,
+            None => return,
+        };
+        let active_side: Side = match self.active_side {
+            Some(side) => side,
+            None => return,
+        };
+
+        /* render hints only for active side */
+        if active_side != self.render_for {
+            return;
+        }
+
+        let pointer_view: char = match *taken_checker_pip {
+            0..BOTTOM_LEFT_BOARD_LEFT_PIP => {
+                self.theme.up
+            }
+            _ => self.theme.down
+        };
+
+        pips_columns[*taken_checker_pip as usize].push(pointer_view);
+    }
+
+    fn add_possible_moves_hints(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+        let possible_moves: &Vec<CheckerMove> =
+            if let Some(possible_moves) = &self.possible_moves {
+                possible_moves
+            } else {
+                return;
+            };
+
+        possible_moves.iter().for_each(|checker_move: &CheckerMove| {
+            match checker_move {
+                CheckerMove::Play(_, to_pip) => {
+                    pips_columns[**to_pip as usize].push(self.theme.possible_move);
+                }
+                CheckerMove::BearOff(_) => { /* @TODO */ }
+            }
+        });
+    }
+
+    fn add_focused_pip_hint(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+        if let Some(focused_pip) = self.focused_pip {
+            pips_columns[*focused_pip as usize].push(self.theme.focused_pip);
+        }
+    }
 }
 
 impl View for StageView {
     fn draw(&self, printer: &Printer) {
         let mut pips_columns: [PipColumn; MAX_PIPS as usize] = std::array::from_fn(|_| Vec::new());
 
+        self.add_board_checkers(&mut pips_columns);
+        self.add_taken_checker_hint(&mut pips_columns);
+        self.add_possible_moves_hints(&mut pips_columns);
+        self.add_focused_pip_hint(&mut pips_columns);
+
         self.render_borders(printer);
         self.render_separators(printer);
-
-        self.render_board_checkers(printer);
-        self.render_taken_checker(printer);
-        self.render_possible_moves(printer);
-        self.render_focused_pip(printer);
-
+        self.render_pips_columns(printer, pips_columns);
         self.render_bore_off_checkers(printer);
         self.render_dices(printer);
-
-        // printer.with_color(ColorStyle::title_primary(), |printer| {
-        //     printer.print(
-        //         (0, 0),
-        //         &"123456789abcdef"
-        //     );
-        //     printer.print(
-        //         (0, 1),
-        //         &"123456789abcdef"
-        //     )
-        // });
     }
 
     fn required_size(&mut self, _: Vec2) -> Vec2 {
