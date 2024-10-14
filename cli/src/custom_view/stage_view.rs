@@ -405,9 +405,9 @@ impl View for StageView {
         let mut pips_stack: PipsStack = std::array::from_fn(|_| Vec::new());
 
         self.add_board_checkers(&mut pips_stack);
+        self.add_focused_pip_hint(&mut pips_stack);
         self.add_taken_checker_hint(&mut pips_stack);
         self.add_possible_moves_hints(&mut pips_stack);
-        self.add_focused_pip_hint(&mut pips_stack);
 
         self.render_borders(printer);
         self.render_separators(printer);

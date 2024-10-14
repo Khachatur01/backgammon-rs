@@ -135,6 +135,8 @@ impl Backgammon {
 
     fn on_focus_pip(&self, current_stage: PossibleStage, direction: Key) -> PossibleStage {
         fn get_pip_to_focus(focused_pip: Pip, direction: Key) -> Result<Pip, String> {
+            /* TODO: prevent from focusing to opponent pip */
+
             let focused_pip: u8 = *focused_pip;
 
             let result_pip = match direction {
