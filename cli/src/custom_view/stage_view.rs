@@ -394,9 +394,13 @@ impl StageView {
     }
 
     fn add_focused_pip_hint(&self, pips_stack: &mut PipsStack) {
-        if let Some(focused_pip) = self.focused_pip {
-            pips_stack[*focused_pip as usize].push(self.theme.focused_pip);
-        }
+        let focused_pip_index: usize = if let Some(focused_pip) = self.focused_pip {
+            *focused_pip as usize
+        } else {
+            return;
+        };
+
+        pips_stack[focused_pip_index].push(self.theme.focused_pip);
     }
 }
 
