@@ -15,7 +15,8 @@ use engine::types::pip::Pip;
 use std::fmt::Pointer;
 use std::usize;
 
-type PipColumn = Vec<char>;
+type PipStack = Vec<char>;
+type PipsStack = [PipStack; MAX_PIPS as usize];
 
 pub struct StageView {
     white_checkers: Checkers,
@@ -164,7 +165,7 @@ impl StageView {
         }
     }
 
-    fn render_pips_columns(&self, printer: &Printer, pips_columns: [PipColumn; MAX_PIPS as usize]) {
+    fn render_pips_columns(&self, printer: &Printer, pips_columns: [PipStack; MAX_PIPS as usize]) {
         pips_columns
             .iter()
             .enumerate()
@@ -273,11 +274,11 @@ impl StageView {
 }
 
 impl StageView {
-    fn add_board_checkers(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+    fn add_board_checkers(&self, pips_stack: &mut PipsStack) {
         fn add_checkers(this: &StageView,
                         checkers: Checkers,
                         checker_view: char,
-                        pips_columns: &mut [PipColumn; MAX_PIPS as usize],
+                        pips_columns: &mut PipsStack,
                         show_focused_pip: bool,
                         get_pip_index: impl Fn(usize) -> usize) {
 
@@ -333,7 +334,7 @@ impl StageView {
         add_checkers(self,
                      active_side_checkers,
                      active_side_checker_view,
-                     pips_columns,
+                     pips_stack,
                      true,
                      |pip| pip
         );
@@ -341,7 +342,7 @@ impl StageView {
         add_checkers(self,
                      opponent_side_checkers,
                      opponent_checker_view,
-                     pips_columns,
+                     pips_stack,
                      false,
                      |pip| {
                             *self.get_opponent_pip(Pip::new(pip as u8)) as usize
@@ -349,7 +350,7 @@ impl StageView {
         );
     }
 
-    fn add_taken_checker_hint(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+    fn add_taken_checker_hint(&self, pips_stack: &mut PipsStack) {
         let taken_checker_pip: Pip = match self.taken_checker_pip {
             Some(pip) => pip,
             None => return,
@@ -371,10 +372,10 @@ impl StageView {
             _ => self.theme.down
         };
 
-        pips_columns[*taken_checker_pip as usize].push(pointer_view);
+        pips_stack[*taken_checker_pip as usize].push(pointer_view);
     }
 
-    fn add_possible_moves_hints(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+    fn add_possible_moves_hints(&self, pips_stack: &mut PipsStack) {
         let possible_moves: &Vec<CheckerMove> =
             if let Some(possible_moves) = &self.possible_moves {
                 possible_moves
@@ -385,32 +386,32 @@ impl StageView {
         possible_moves.iter().for_each(|checker_move: &CheckerMove| {
             match checker_move {
                 CheckerMove::Play(_, to_pip) => {
-                    pips_columns[**to_pip as usize].push(self.theme.possible_move);
+                    pips_stack[**to_pip as usize].push(self.theme.possible_move);
                 }
                 CheckerMove::BearOff(_) => { /* @TODO */ }
             }
         });
     }
 
-    fn add_focused_pip_hint(&self, pips_columns: &mut [PipColumn; MAX_PIPS as usize]) {
+    fn add_focused_pip_hint(&self, pips_stack: &mut PipsStack) {
         if let Some(focused_pip) = self.focused_pip {
-            pips_columns[*focused_pip as usize].push(self.theme.focused_pip);
+            pips_stack[*focused_pip as usize].push(self.theme.focused_pip);
         }
     }
 }
 
 impl View for StageView {
     fn draw(&self, printer: &Printer) {
-        let mut pips_columns: [PipColumn; MAX_PIPS as usize] = std::array::from_fn(|_| Vec::new());
+        let mut pips_stack: PipsStack = std::array::from_fn(|_| Vec::new());
 
-        self.add_board_checkers(&mut pips_columns);
-        self.add_taken_checker_hint(&mut pips_columns);
-        self.add_possible_moves_hints(&mut pips_columns);
-        self.add_focused_pip_hint(&mut pips_columns);
+        self.add_board_checkers(&mut pips_stack);
+        self.add_taken_checker_hint(&mut pips_stack);
+        self.add_possible_moves_hints(&mut pips_stack);
+        self.add_focused_pip_hint(&mut pips_stack);
 
         self.render_borders(printer);
         self.render_separators(printer);
-        self.render_pips_columns(printer, pips_columns);
+        self.render_pips_columns(printer, pips_stack);
         self.render_bore_off_checkers(printer);
         self.render_dices(printer);
     }
