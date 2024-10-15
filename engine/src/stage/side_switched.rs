@@ -9,6 +9,7 @@ use crate::types::checker_move::CheckerMove;
 use crate::types::dice_pair::DicePair;
 use crate::types::pip::Pip;
 use rand::Rng;
+use crate::types::dice::Dice;
 
 pub struct SideSwitched {
     board: Board,
