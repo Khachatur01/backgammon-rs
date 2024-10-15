@@ -33,10 +33,10 @@ impl Started {
     pub fn throw_dices(self) -> DicesThrown {
         /* generate random dices until dices are equal */
         let dice_pair: DicePair = loop {
-            let first_dice: u8 = rand::thread_rng().gen_range(1..=6);
-            let second_dice: u8 = rand::thread_rng().gen_range(1..=6);
+            let first_dice: Dice = Dice::new(rand::thread_rng().gen_range(1..=6));
+            let second_dice: Dice = Dice::new(rand::thread_rng().gen_range(1..=6));
 
-            if first_dice != second_dice {
+            if *first_dice != *second_dice {
                 break DicePair::new(first_dice, second_dice);
             }
         };

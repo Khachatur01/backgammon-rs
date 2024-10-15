@@ -1,18 +1,13 @@
+use crate::types::dice::Dice;
+
 #[derive(Copy, Clone)]
 pub struct DicePair {
-    first: u8,
-    second: u8,
+    first: Dice,
+    second: Dice,
 }
 
 impl DicePair {
-    pub fn new(first: u8, second: u8) -> Self {
-        if first == 0 || first > 6 || second == 0 || second > 6 {
-            panic!(
-                "Can't create DicePair. \
-                Invalid value: one - {first}, two - {second}. \
-                Must be in the range [1 - 6]"
-            );
-        }
+    pub fn new(first: Dice, second: Dice) -> Self {
 
         Self {
             first, second
@@ -20,10 +15,10 @@ impl DicePair {
     }
 
     pub fn first(&self) -> u8 {
-        self.first
+        *self.first
     }
 
     pub fn second(&self) -> u8 {
-        self.second
+        *self.second
     }
 }

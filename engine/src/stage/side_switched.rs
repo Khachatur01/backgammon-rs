@@ -43,8 +43,8 @@ impl SideSwitched {
 
     pub fn throw_dices(self) -> AfterThrowingDices {
         let dice_pair: DicePair = {
-            let first_dice: u8 = rand::thread_rng().gen_range(1..=6);
-            let second_dice: u8 = rand::thread_rng().gen_range(1..=6);
+            let first_dice: Dice = Dice::new(rand::thread_rng().gen_range(1..=6));
+            let second_dice: Dice = Dice::new(rand::thread_rng().gen_range(1..=6));
 
             DicePair::new(first_dice, second_dice)
         };
